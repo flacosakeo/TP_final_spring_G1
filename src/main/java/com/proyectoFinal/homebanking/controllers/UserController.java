@@ -26,6 +26,7 @@ public class UserController {
     @Autowired
     private final UserService service;
     //prueba branch marcelo
+    //prueba nro 2
     public UserController(UserService service) {
         this.service = service;
     }
