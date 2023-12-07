@@ -5,6 +5,9 @@ import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.models.User;
 import com.proyectoFinal.homebanking.services.UserService;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,8 +49,36 @@ public class UserController {
     }
     
     @PostMapping()
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO user){
+    public ResponseEntity<?> createUser(@RequestBody UserDTO user){
+
+        if(!validaEmail(user)){
+            //TODO corregir status
+            return ResponseEntity.status(HttpStatus.CREATED).body("Email incorrecto");
+        }
+        if(!validaPassword(user)){
+            //TODO corregir status
+            return ResponseEntity.status(HttpStatus.CREATED).body("password incorrecta. debe contener al menos 8 caracteres ");
+
+        }
+        if(!validaName(user)){
+            //TODO corregir status
+            return ResponseEntity.status(HttpStatus.CREATED).body("name incorrecto. debe comenzar en mayuscula y tener al menos 2 letras. acepta nombres compuestos(hasta 3 palabras) ");
+
+        }
+        if(!validaUsername(user)){
+            //TODO corregir status
+            return ResponseEntity.status(HttpStatus.CREATED).body("username incorrecto. debe tener entre 4 y 8 caracteres. solo admite letras o numeros");
+
+        }
+        if(!validaDni(user)){
+            //TODO corregir status
+            return ResponseEntity.status(HttpStatus.CREATED).body("dni incorrecto. debe ser de 8 digitos");
+
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(user));
+
+
     }
     
     //@PutMapping(value="/{id}")
@@ -62,4 +93,67 @@ public class UserController {
     public ResponseEntity<String> deleteUser(@PathVariable Long id){
         return ResponseEntity.status(HttpStatus.OK).body(service.deleteUser(id));
     }
+
+
+    public Boolean validaEmail(UserDTO userdto){
+        String text= userdto.getEmail();
+
+        Pattern pattern = Pattern.compile("[^@ ]+@[^@ .]+\\.[a-z]{2,}(\\.[a-z]{2})?");
+        Matcher matcher = pattern.matcher(text);
+
+        Boolean resultado=(matcher.matches());
+
+        return resultado;
+    }
+
+    public Boolean validaPassword(UserDTO userdto){
+        String text= userdto.getPassword();
+
+        Pattern pattern = Pattern.compile(".{8}");
+        Matcher matcher = pattern.matcher(text);
+
+        Boolean resultado=(matcher.matches());
+
+        return resultado;
+    }
+
+    //el name debe comenzar en mayuscula y tener al menos 2 letras. acepta nombres compuestos(hasta 3 palabras)
+    public Boolean validaName(UserDTO userdto){
+        String text= userdto.getName();
+
+        Pattern pattern = Pattern.compile("([A-Z][a-z]+ ?){1,3}");
+        Matcher matcher = pattern.matcher(text);
+
+        Boolean resultado=(matcher.matches());
+
+        return resultado;
+    }
+
+    //valida que elusername tenga al entre 4 y 8 caracteres. solo admite letras o numeros
+    public Boolean validaUsername(UserDTO userdto){
+        String text= userdto.getUsername();
+
+        Pattern pattern = Pattern.compile("\\w{4,8}");
+        Matcher matcher = pattern.matcher(text);
+
+        Boolean resultado=(matcher.matches());
+
+        return resultado;
+    }
+
+    //valida que el dni sean 8 digitos
+    public Boolean validaDni(UserDTO userdto){
+        String text= userdto.getDni();
+
+        Pattern pattern = Pattern.compile("\\d{8}");
+        Matcher matcher = pattern.matcher(text);
+
+        Boolean resultado=(matcher.matches());
+
+        return resultado;
+    }
+
+
+
+
 }
