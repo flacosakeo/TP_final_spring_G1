@@ -9,8 +9,6 @@ import com.proyectoFinal.homebanking.repositories.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,15 +26,23 @@ public class UserService {
         return usersDTO;
     }
     
-    public UserDTO createUser(UserDTO userDTO){
+    public Object createUser(UserDTO userDTO){
         User userValidate = repository.findByEmail(userDTO.getEmail());
-        
-        if(userValidate==null){        
-            User user = repository.save(UserMapper.dtoToUser(userDTO));
-            return UserMapper.userToDto(user);
+        User userValidateDni = repository.findByDni(userDTO.getDni());
+        if(userValidate==null){
+            if(userValidateDni==null){
+                //User userValidateDni = repository.findByDni(userDTO.getDni());
+                //if(userValidateDni==null){
+                User user = repository.save(UserMapper.dtoToUser(userDTO));
+                return UserMapper.userToDto(user);
+            }else{
+                return ("Dni ya existen: "+userValidateDni.getDni());
+                //String mensaje="Dni ya existe";
+                //return new Mensaje(mensaje);
+            }
         }else{
-            throw new UserNotExistsException("Existe: "+userValidate.getEmail());
-        }
+            return("Email ya existen: "+userValidate.getEmail());
+        }        
     }
     
     public UserDTO getUserById(Long id){
@@ -49,8 +55,9 @@ public class UserService {
             repository.deleteById(id);
             return "Eliminado";
         }else{
-            throw new  UserNotExistsException("Usuario no existe");
-        }       
+            //throw new  UserNotExistsException("Usuario no existe");
+            return "Usuario no existe";
+        }
     }
     
     public UserDTO updateUser(Long id, UserDTO dto){
@@ -78,9 +85,24 @@ public class UserService {
         return null;
     }
     
-    /*public String validateUserByEmail(String email){
-        if (repository.findByEmail(email)){
-            
+    public class Mensaje{
+        private String mensaje;
+
+        public Mensaje(String mensaje) {
+            this.mensaje = mensaje;
         }
-    }*/
+
+        public Mensaje() {
+        }
+
+        public String getMensaje() {
+            return mensaje;
+        }
+
+        public void setMensaje(String mensaje) {
+            this.mensaje = mensaje;
+        }
+        
+        
+    }
 }
