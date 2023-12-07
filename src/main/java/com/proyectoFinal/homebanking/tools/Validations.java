@@ -1,6 +1,6 @@
 package com.proyectoFinal.homebanking.tools;
 
-import com.proyectoFinal.homebanking.exceptions.AccountsAreTheSame;
+import com.proyectoFinal.homebanking.exceptions.AccountsAreTheSameException;
 import com.proyectoFinal.homebanking.exceptions.UserNotExistsException;
 import com.proyectoFinal.homebanking.repositories.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class Validations {
         if(!Objects.equals(origin, target)){
             valid = true;
         }else{
-            throw new AccountsAreTheSame("Ambas cuentas son iguales: " + origin + ", " + target);
+            throw new AccountsAreTheSameException("Ambas cuentas son iguales: " + origin + ", " + target);
         }
         return valid;
     }
