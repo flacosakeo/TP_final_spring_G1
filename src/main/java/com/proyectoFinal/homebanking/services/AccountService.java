@@ -5,6 +5,7 @@ import com.proyectoFinal.homebanking.exceptions.UserNotExistsException;
 import com.proyectoFinal.homebanking.mappers.AccountMapper;
 import com.proyectoFinal.homebanking.models.Account;
 import com.proyectoFinal.homebanking.models.DTO.AccountDTO;
+import com.proyectoFinal.homebanking.models.Enum.AccountAlias;
 import com.proyectoFinal.homebanking.models.Enum.AccountType;
 import com.proyectoFinal.homebanking.repositories.AccountRepository;
 import java.util.List;
@@ -25,12 +26,21 @@ public class AccountService {
                 .collect(Collectors.toList());
         return accountsDTO;
     }
-    
-    public AccountDTO createAccount(AccountDTO accountDTO){
-        accountDTO.setTipo (AccountType.values()[new Random().nextInt(AccountType.values().length)]);
-        accountDTO.setMonto(0.0);
-        Account account = repository.save(AccountMapper.dtoToAccount(accountDTO));
-        return AccountMapper.accountToDto(account);
+
+    public Object createAccount(AccountDTO accountDTO){
+        /*for(int i=1; i<4; i++){
+            List<AccountAlias> alias = AccountAlias.values()[new Random().nextInt(AccountAlias.values().length)];
+        }*/
+        accountDTO.setAlias(AccountAlias.values()[new Random().nextInt(AccountAlias.values().length)]);
+        //accountDTO.setTipo (AccountType.values()[new Random().nextInt(AccountType.values().length)]);
+        //accountDTO.setMonto(0.0);
+        Account cbuValidate = repository.findByCbu(accountDTO.getCbu());
+        if (cbuValidate==null){
+            Account account = repository.save(AccountMapper.dtoToAccount(accountDTO));
+            return AccountMapper.accountToDto(account);
+        }else{
+            return "Cbu ya existe";
+        }
     }
     
     public AccountDTO getAccountById(Long id){
@@ -43,32 +53,38 @@ public class AccountService {
             repository.deleteById(id);
             return "Eliminado";
         }else{
-            throw new  UserNotExistsException("Cuenta no existe");
+            return "Cuenta no existe";
         }       
     }
     
-    public AccountDTO updateAccount(Long id, AccountDTO dto){
+    public Object updateAccount(Long id, AccountDTO dto){
+    //Account cbuValidate = repository.findByCbu(dto.getCbu());
+    //if(cbuValidate==null){
         if(repository.existsById(id)){
             Account accountToModify=repository.findById(id).get();
             //logica del patch
             if (dto.getTipo()!=null){
-                accountToModify.setTipo(dto.getTipo());
+                //accountToModify.setTipo(dto.getTipo());
             }
             if (dto.getDueño()!=null){
                 accountToModify.setDueño(dto.getDueño());
             }
             if (dto.getCbu()!=null){
-                accountToModify.setCbu(dto.getCbu());
+                //accountToModify.setCbu(dto.getCbu());
             }
             if (dto.getAlias()!=null){
                 accountToModify.setAlias(dto.getAlias());
             }
             if (dto.getMonto()!=null){
-                accountToModify.setMonto(dto.getMonto());
+                //accountToModify.setMonto(dto.getMonto());
             }
             repository.save(accountToModify);
             return AccountMapper.accountToDto(accountToModify);
         }
+
+    //}else{
+    //    return "Cbu ya existe";
+    //}
         return null;
     }
         

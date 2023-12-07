@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -49,38 +48,37 @@ public class UserController {
     }
     
     @PostMapping()
-    public ResponseEntity<?> createUser(@RequestBody UserDTO user){
+    public ResponseEntity<?> createUser(@RequestBody UserDTO dto){
 
-        if(!validaEmail(user)){
-            //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("Email incorrecto");
-        }
-        if(!validaPassword(user)){
-            //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("password incorrecta. debe contener al menos 8 caracteres ");
-
-        }
-        if(!validaName(user)){
-            //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("name incorrecto. debe comenzar en mayuscula y tener al menos 2 letras. acepta nombres compuestos(hasta 3 palabras) ");
-
-        }
-        if(!validaUsername(user)){
-            //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("username incorrecto. debe tener entre 4 y 8 caracteres. solo admite letras o numeros");
-
-        }
-        if(!validaDni(user)){
-            //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("dni incorrecto. debe ser de 8 digitos");
-
+        // Verificar si el DNI es válido y asi con cada atributo
+        if( !dniNumberDigitsIsValid(dto.getDni()) ) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("El DNI "
+                    + dto.getDni() + " no es valido! ¡Debe contener 8 caracteres numericos!");
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(user));
+        //TODO corregir status
+        if(!emailIsValid(dto.getEmail())) return ResponseEntity.status(HttpStatus.CREATED).body("¡Email invalido!");
 
+        if(!passwordIsValid(dto.getPassword())) {
+            //TODO corregir status
+            return ResponseEntity.status(HttpStatus.CREATED).body("¡Contraseña incorrecta! Debe contener al menos 8 caracteres");
+        }
 
+        if(!nameIsValid(dto.getName())){
+            //TODO corregir status
+            return ResponseEntity.status(HttpStatus.CREATED).body("¡Nombre invalido! " +
+                    "Debe comenzar en mayúscula y tener al menos 2 letras. Acepta nombres compuestos (hasta 3 palabras)");
+        }
+
+        if(!usernameIsValid(dto.getUsername())){
+            //TODO corregir status
+            return ResponseEntity.status(HttpStatus.CREATED).body("¡Nombre invalido! Debe tener entre 4 y 8 caracteres." +
+                    " Solo admite letras o números");
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(dto));
     }
-    
+        
     //@PutMapping(value="/{id}")
     //public void updateAllUser(@PathVariable Long id){}
     
@@ -94,66 +92,50 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(service.deleteUser(id));
     }
 
+    // Valida que el dni tenga 8 digitos
+    public Boolean dniNumberDigitsIsValid(String dni) {
+        // DNI a verificar viene por el parametro.
 
-    public Boolean validaEmail(UserDTO userdto){
-        String text= userdto.getEmail();
+        // Patrón para verificar que el DNI contenga exactamente 8 dígitos
+        String regex = "\\d{8}";
 
+        // Compilar el patrón
+        Pattern pattern = Pattern.compile(regex);
+
+        // Crear un Matcher con el DNI
+        Matcher matcher = pattern.matcher(dni);
+
+        // Verificar si el DNI cumple con el patrón y retornar el resultado
+        return matcher.matches();
+    }
+
+    public Boolean emailIsValid(String email){
         Pattern pattern = Pattern.compile("[^@ ]+@[^@ .]+\\.[a-z]{2,}(\\.[a-z]{2})?");
-        Matcher matcher = pattern.matcher(text);
+        Matcher matcher = pattern.matcher(email);
 
-        Boolean resultado=(matcher.matches());
-
-        return resultado;
+        return matcher.matches();
     }
 
-    public Boolean validaPassword(UserDTO userdto){
-        String text= userdto.getPassword();
-
+    public Boolean passwordIsValid(String password){
         Pattern pattern = Pattern.compile(".{8}");
-        Matcher matcher = pattern.matcher(text);
+        Matcher matcher = pattern.matcher(password);
 
-        Boolean resultado=(matcher.matches());
-
-        return resultado;
+        return matcher.matches();
     }
 
-    //el name debe comenzar en mayuscula y tener al menos 2 letras. acepta nombres compuestos(hasta 3 palabras)
-    public Boolean validaName(UserDTO userdto){
-        String text= userdto.getName();
-
+    // El name debe comenzar en mayuscula y tener al menos 2 letras. Acepta nombres compuestos(hasta 3 palabras)
+    public Boolean nameIsValid(String name){
         Pattern pattern = Pattern.compile("([A-Z][a-z]+ ?){1,3}");
-        Matcher matcher = pattern.matcher(text);
+        Matcher matcher = pattern.matcher(name);
 
-        Boolean resultado=(matcher.matches());
-
-        return resultado;
+        return matcher.matches();
     }
 
-    //valida que elusername tenga al entre 4 y 8 caracteres. solo admite letras o numeros
-    public Boolean validaUsername(UserDTO userdto){
-        String text= userdto.getUsername();
-
+    // Valida que el username tenga al entre 4 y 8 caracteres. Solo admite letras o numeros.
+    public Boolean usernameIsValid(String username){
         Pattern pattern = Pattern.compile("\\w{4,8}");
-        Matcher matcher = pattern.matcher(text);
+        Matcher matcher = pattern.matcher(username);
 
-        Boolean resultado=(matcher.matches());
-
-        return resultado;
+        return matcher.matches();
     }
-
-    //valida que el dni sean 8 digitos
-    public Boolean validaDni(UserDTO userdto){
-        String text= userdto.getDni();
-
-        Pattern pattern = Pattern.compile("\\d{8}");
-        Matcher matcher = pattern.matcher(text);
-
-        Boolean resultado=(matcher.matches());
-
-        return resultado;
-    }
-
-
-
-
 }

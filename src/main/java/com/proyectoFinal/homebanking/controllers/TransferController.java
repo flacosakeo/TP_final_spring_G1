@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/transfer")
 public class TransferController {
-    @Autowired
     private final TransferService service;
     
     public TransferController(TransferService service) {
@@ -26,8 +25,8 @@ public class TransferController {
     }
     
     @GetMapping
-    public ResponseEntity<List<TransferDTO>> getTransfer(){
-        List<TransferDTO> lista=service.getTransfer();
+    public ResponseEntity<List<TransferDTO>> getTransfers(){
+        List<TransferDTO> lista=service.getTransfers();
         //llamar al servicio de usuarios para obtener la lista de usuarios
         return ResponseEntity.status(HttpStatus.OK).body(lista);
     }

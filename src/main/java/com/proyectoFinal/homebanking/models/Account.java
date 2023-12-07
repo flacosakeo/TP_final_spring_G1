@@ -1,6 +1,7 @@
 
 package com.proyectoFinal.homebanking.models;
 
+import com.proyectoFinal.homebanking.models.Enum.AccountAlias;
 import com.proyectoFinal.homebanking.models.Enum.AccountType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +9,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,13 +32,15 @@ public class Account {
     private String dueño;
     
     @Column(name="CBU")
-    private Long cbu;
+
+    private String cbu;
     
     @Column(name="alias")
-    private String alias;
+    private AccountAlias alias;
     
     @Column(name="importe")
-    private Double monto;
+    private BigDecimal monto;
     
-    
+    @ManyToOne
+    private User owner; 
 }
