@@ -12,7 +12,6 @@ import com.proyectoFinal.homebanking.repositories.AccountRepository;
 import com.proyectoFinal.homebanking.repositories.TransferRepository;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
