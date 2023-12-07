@@ -43,7 +43,6 @@ public class TransferController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createTransfer(transfer));
     }
 
-    //Decicimos no implementar la modificacion de una transferencia. Explicacion en el servicio.
     @PutMapping(value="/{id}")
     public ResponseEntity<TransferDTO> updateTransfer(@PathVariable Long id, @RequestBody TransferDTO transfer){
         return ResponseEntity.status(HttpStatus.OK).body(service.updateTransfer(id, transfer));

@@ -10,13 +10,16 @@ import jakarta.persistence.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.*;
 
 @Entity
 @Table(name="transfers")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Transfer {
     @Id // Establece que este campo es PK
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Establece que el campo es autoincremental
@@ -25,8 +28,8 @@ public class Transfer {
     
     private BigDecimal amount;
     
-    @Column(name = "source_account")
-    private Long sourceAccount;
+    @Column(name = "origin_account")
+    private Long originAccount;
     
     @Column(name = "target_account")
     private Long targetAccount;

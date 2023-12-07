@@ -43,21 +43,20 @@ public class TransferService {
         }       
     }
 
-    // Decicimos no implementar la modificacion de una transferencia. Ya que creemos que una transferencia no deberia
-    // ser modificable, por el hecho de que queremos que quede registrado cada movimiento.
+    // Creemos que una transferencia no deberia ser modificable, por el hecho de que queremos que quede registrado cada
+    // movimiento. Nos parece poco etico que se pueda modificar una transferencia.
     // Si hace falta realizar una modificacion, por ejemplo si se transfirio erroneamente, deberia realizarse otra
-    // transferencia con el mismo monto y id de la cuentas de origen y destino de forma invertida.
-    // Nos parece poco etico que se pueda modificar una transferencia.
+    // transferencia con el mismo monto y id de las cuentas de origen y destino de forma invertida.
     // TODO (#Ref. 2): agregar atributo en entidad TRANSFER que indique quien realiza o el estado de la transferencia.
-    /*public TransferDTO updateTransfer(Long id, TransferDTO dto){
+    public TransferDTO updateTransfer(Long id, TransferDTO dto){
         if(repository.existsById(id)){
             Transfer transferToModify = repository.findById(id).get();
             //logica del patch
             if(dto.getAmount() != null)
                 transferToModify.setAmount(dto.getAmount());
 
-            if(dto.getSourceAccount() != null)
-                transferToModify.setSourceAccount(dto.getSourceAccount());
+            if(dto.getOriginAccount() != null)
+                transferToModify.setOriginAccount(dto.getOriginAccount());
 
             if (dto.getTargetAccount() != null)
                 transferToModify.setTargetAccount(dto.getTargetAccount());
@@ -70,5 +69,5 @@ public class TransferService {
         }
 
         throw new TransferNotExistsException("¡La transferencia con id " + id + " no existe!");
-    }*/
+    }
 }

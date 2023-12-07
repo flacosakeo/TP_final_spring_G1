@@ -7,22 +7,21 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class TransferMapper {
     public static Transfer dtoToTransfer(TransferDTO dto){
-        Transfer transfer= new Transfer();
-        transfer.setId_transfer(dto.getId_transfer());
-        transfer.setMonto(dto.getMonto());
-        transfer.setId_cta_origen(dto.getId_cta_origen());
-        transfer.setId_cta_destino(dto.getId_cta_destino());
-        transfer.setFecha(dto.getFecha());
-        return transfer;
+        return Transfer.builder()
+                .amount(dto.getAmount())
+                .originAccount(dto.getOriginAccount())
+                .targetAccount(dto.getTargetAccount())
+                .dateTime(dto.getDateTime())
+                .build();
     }
     
     public static TransferDTO transferToDto(Transfer transfer){
-        TransferDTO dto = new TransferDTO();
-        dto.setId_transfer(transfer.getId_transfer());
-        dto.setMonto(transfer.getMonto());
-        dto.setId_cta_origen(transfer.getId_cta_origen());
-        dto.setId_cta_destino(transfer.getId_cta_destino());
-        dto.setFecha(transfer.getFecha());
-        return dto;
-    }   
+        return TransferDTO.builder()
+                .id(transfer.getId())
+                .amount(transfer.getAmount())
+                .originAccount(transfer.getOriginAccount())
+                .targetAccount(transfer.getTargetAccount())
+                .dateTime(transfer.getDateTime())
+                .build();
+    }
 }
