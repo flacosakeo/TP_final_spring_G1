@@ -4,7 +4,10 @@ import com.proyectoFinal.homebanking.exceptions.TransferNotExistsException;
 import com.proyectoFinal.homebanking.mappers.TransferMapper;
 import com.proyectoFinal.homebanking.models.DTO.TransferDTO;
 import com.proyectoFinal.homebanking.models.Transfer;
+import com.proyectoFinal.homebanking.repositories.AccountRepository;
 import com.proyectoFinal.homebanking.repositories.TransferRepository;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +16,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class TransferService {
     @Autowired
-    private TransferRepository repository;    
+    private TransferRepository transferRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
     
     public List<TransferDTO> getTransfer(){
-        List<Transfer> transfers = repository.findAll();
+        List<Transfer> transfers = transferRepository.findAll();
         List<TransferDTO> transfersDTO=transfers.stream()
                 .map(TransferMapper::transferToDto)                
                 .collect(Collectors.toList());
@@ -25,18 +31,24 @@ public class TransferService {
     
     public TransferDTO createTransfer(TransferDTO transferDTO){
         //accountDTO.setTipo(new Random (AccountType.values()));
-        Transfer transfer = repository.save(TransferMapper.dtoToTransfer(transferDTO));
+        transferDTO.setDateTime(LocalDateTime.now());
+
+//        accountRepository.existsByCbu(transferDTO.getOriginAccount());
+//        accountRepository.existsByCbu(transferDTO.getTargetAccount());
+
+
+        Transfer transfer = transferRepository.save(TransferMapper.dtoToTransfer(transferDTO));
         return TransferMapper.transferToDto(transfer);
     }
     
     public TransferDTO getTransferById(Long id){
-        Transfer entity = repository.findById(id).get();
+        Transfer entity = transferRepository.findById(id).get();
         return TransferMapper.transferToDto(entity);
     }
     
     public String deleteTransfer(Long id){
-        if (repository.existsById(id)){
-            repository.deleteById(id);
+        if (transferRepository.existsById(id)){
+            transferRepository.deleteById(id);
             return "Transferencia Eliminada";
         }else{
             throw new TransferNotExistsException("¡La transferencia con id " + id + " no existe!");
@@ -49,8 +61,8 @@ public class TransferService {
     // transferencia con el mismo monto y id de las cuentas de origen y destino de forma invertida.
     // TODO (#Ref. 2): agregar atributo en entidad TRANSFER que indique quien realiza o el estado de la transferencia.
     public TransferDTO updateTransfer(Long id, TransferDTO dto){
-        if(repository.existsById(id)){
-            Transfer transferToModify = repository.findById(id).get();
+        if(transferRepository.existsById(id)){
+            Transfer transferToModify = transferRepository.findById(id).get();
             //logica del patch
             if(dto.getAmount() != null)
                 transferToModify.setAmount(dto.getAmount());
@@ -64,7 +76,7 @@ public class TransferService {
             if (dto.getDateTime() != null)
                 transferToModify.setDateTime(dto.getDateTime());
 
-            Transfer transferModified = repository.save(transferToModify);
+            Transfer transferModified = transferRepository.save(transferToModify);
             return TransferMapper.transferToDto(transferModified);
         }
 
