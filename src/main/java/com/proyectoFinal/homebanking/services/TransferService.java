@@ -19,13 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TransferService {
     @Autowired
-    private TransferRepository repository;   
+    private TransferRepository repository;
     private AccountRepository accountRepository;
     
     public TransferService(TransferRepository repository, AccountRepository accountRepository){
         this.repository = repository;
         this.accountRepository = accountRepository;
     }
+
     
     public List<TransferDTO> getTransfer(){
         List<Transfer> transfers = repository.findAll();
@@ -47,7 +48,7 @@ public class TransferService {
             return "Transferencia Eliminada";
         }else{
             return "No se ha eliminado";
-        }       
+        }
     }
     
     public TransferDTO updateTransfer(Long id, TransferDTO dto){
