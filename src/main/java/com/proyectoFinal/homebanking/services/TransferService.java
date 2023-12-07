@@ -2,6 +2,7 @@ package com.proyectoFinal.homebanking.services;
 
 import com.proyectoFinal.homebanking.exceptions.InsufficientFoundsException;
 import com.proyectoFinal.homebanking.exceptions.AccountNotFoundException;
+import com.proyectoFinal.homebanking.exceptions.TransferNotExistsException;
 import com.proyectoFinal.homebanking.exceptions.TransferNotFoundException;
 import com.proyectoFinal.homebanking.mappers.TransferMapper;
 import com.proyectoFinal.homebanking.models.Account;
@@ -9,6 +10,8 @@ import com.proyectoFinal.homebanking.models.DTO.TransferDTO;
 import com.proyectoFinal.homebanking.models.Transfer;
 import com.proyectoFinal.homebanking.repositories.AccountRepository;
 import com.proyectoFinal.homebanking.repositories.TransferRepository;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,78 +22,97 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class TransferService {
     @Autowired
-    private TransferRepository repository;
+    private TransferRepository transferRepository;
     private AccountRepository accountRepository;
     
-    public TransferService(TransferRepository repository, AccountRepository accountRepository){
-        this.repository = repository;
+    public TransferService(TransferRepository transferRepository, AccountRepository accountRepository){
+        this.transferRepository = transferRepository;
         this.accountRepository = accountRepository;
     }
 
-    
-    public List<TransferDTO> getTransfer(){
-        List<Transfer> transfers = repository.findAll();
-        List<TransferDTO> transfersDTO=transfers.stream()
+    public List<TransferDTO> getTransfers(){
+        List<Transfer> transfers = transferRepository.findAll();
+
+        return transfers.stream()
                 .map(TransferMapper::transferToDto)                
                 .collect(Collectors.toList());
-        return transfersDTO;
     }
     
     public TransferDTO getTransferById(Long id){
-        Transfer transfer = repository.findById(id).orElseThrow(()->
-        new TransferNotFoundException("Transferencia no encontrada id: "+id));
+        Transfer transfer = transferRepository.findById(id).orElseThrow(() ->
+            new TransferNotFoundException("Transferencia no encontrada id: " + id));
         return TransferMapper.transferToDto(transfer);
     }
     
     public String deleteTransfer(Long id){
-        if (repository.existsById(id)){
-            repository.deleteById(id);
-            return "Transferencia Eliminada";
+        if (transferRepository.existsById(id)){
+            transferRepository.deleteById(id);
+            return "¡La transferencia con id " + id + " ha sido eliminada!";
         }else{
-            return "No se ha eliminado";
+            throw new TransferNotExistsException("¡La transferencia con id " + id + " no existe!");
         }
     }
-    
-    public TransferDTO updateTransfer(Long id, TransferDTO dto){
-            Transfer transfer=repository.findById(id).orElseThrow(()->
-            new TransferNotFoundException("No se encontro el id: "+id));
-            Transfer transferToModify=TransferMapper.dtoToTransfer(dto);
-            transferToModify.setId_transfer(transfer.getId_transfer());
-            return TransferMapper.transferToDto(transferToModify);
-    }
-    
+
     @Transactional
-    public TransferDTO createTransfer(TransferDTO transferDTO){
+    public TransferDTO createTransfer(TransferDTO dto){
         //verificar que las cuentas origen y destino existan
-        Account cta_origen = accountRepository.findById(transferDTO.getId_cta_origen())
-                             .orElseThrow(()-> new AccountNotFoundException("Cuenta origen no existe, id: "
-                                                                            +transferDTO.getId_cta_origen()));
-        Account cta_destino = accountRepository.findById(transferDTO.getId_cta_destino())
-                             .orElseThrow(()-> new AccountNotFoundException("Cuenta destino no existe, id: "
-                                                                            +transferDTO.getId_cta_destino()));
+        Account originAccount = accountRepository.findById(dto.getOriginAccount())
+                             .orElseThrow(()-> new AccountNotFoundException("Cuenta origen no existe, id: " + dto.getOriginAccount()));
+
+        Account destinationAccount = accountRepository.findById(dto.getTargetAccount())
+                             .orElseThrow(()-> new AccountNotFoundException("Cuenta destino no existe, id: " + dto.getTargetAccount()));
         
         //verifica si la cuenta origen tiene fondos
-        if (cta_origen.getMonto().compareTo(transferDTO.getMonto())<0){
-            throw new InsufficientFoundsException("Fondos insufucuentes, id: "+transferDTO.getId_cta_origen());
+        if (originAccount.getMonto().compareTo(dto.getAmount()) < 0){
+            throw new InsufficientFoundsException("Fondos insuficientes, id: " + dto.getOriginAccount());
         }
         
         //se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
-        cta_origen.setMonto(cta_origen.getMonto().subtract(transferDTO.getMonto()));
-        cta_destino.setMonto(cta_destino.getMonto().add(transferDTO.getMonto()));
+        originAccount.setMonto(originAccount.getMonto().subtract(dto.getAmount()));
+        destinationAccount.setMonto(destinationAccount.getMonto().add(dto.getAmount()));
         
         //guarda las cuentas actualizadas
-        accountRepository.save(cta_origen);
-        accountRepository.save(cta_destino);
+        accountRepository.save(originAccount);
+        accountRepository.save(destinationAccount);
         
-        //crea la transferencia y la gusrada en base de datos
-        Transfer transfer = new Transfer();
-        Date fecha = new Date();
-        transfer.setFecha(fecha);
-        transfer.setId_cta_origen(cta_origen.getId_account());
-        transfer.setId_cta_destino(cta_destino.getId_account());
-        transfer.setMonto(transferDTO.getMonto());
-        transfer = repository.save(transfer);
+        //crea la transferencia y la guarda en base de datos
+        Transfer transfer = Transfer.builder()
+                .amount(dto.getAmount())
+                .originAccount(dto.getOriginAccount())
+                .targetAccount(dto.getTargetAccount())
+                .dateTime(LocalDateTime.now())
+                .build();
+
+        transfer = transferRepository.save(transfer);
         return TransferMapper.transferToDto(transfer);
+    }
+
+    // Creemos que una transferencia no deberia ser modificable, por el hecho de que queremos que quede registrado cada
+    // movimiento. Nos parece poco etico que se pueda modificar una transferencia.
+    // Si hace falta realizar una modificacion, por ejemplo si se transfirio erroneamente, deberia realizarse otra
+    // transferencia con el mismo monto y id de las cuentas de origen y destino de forma invertida.
+    // TODO (#Ref. 2): agregar atributo en entidad TRANSFER que indique quien realiza o el estado de la transferencia.
+    public TransferDTO updateTransfer(Long id, TransferDTO dto){
+        if(transferRepository.existsById(id)){
+            Transfer transferToModify = transferRepository.findById(id).get();
+            //logica del patch
+            if(dto.getAmount() != null)
+                transferToModify.setAmount(dto.getAmount());
+
+            if(dto.getOriginAccount() != null)
+                transferToModify.setOriginAccount(dto.getOriginAccount());
+
+            if (dto.getTargetAccount() != null)
+                transferToModify.setTargetAccount(dto.getTargetAccount());
+
+            if (dto.getDateTime() != null)
+                transferToModify.setDateTime(dto.getDateTime());
+
+            Transfer transferModified = transferRepository.save(transferToModify);
+            return TransferMapper.transferToDto(transferModified);
+        }
+
+        throw new TransferNotExistsException("La transferencia con id " + id + " no existe!");
     }
 }
 

@@ -6,37 +6,22 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class TransferMapper {
-    public Transfer dtoToTransfer(TransferDTO dto){
+    public static Transfer dtoToTransfer(TransferDTO dto){
         return Transfer.builder()
-                .id_transfer(dto.getId_transfer())
-                .monto(dto.getMonto())
-                .fecha(dto.getFecha())
-                .id_cta_origen(dto.getId_cta_origen())
-                .id_cta_destino(dto.getId_cta_destino())
+                .amount(dto.getAmount())
+                .originAccount(dto.getOriginAccount())
+                .targetAccount(dto.getTargetAccount())
+                .dateTime(dto.getDateTime())
                 .build();
-        /*Transfer transfer= new Transfer();
-        transfer.setId_transfer(dto.getId_transfer());
-        transfer.setMonto(dto.getMonto());
-        transfer.setId_cta_origen(dto.getId_cta_origen());
-        transfer.setId_cta_destino(dto.getId_cta_destino());
-        transfer.setFecha(dto.getFecha());
-        return transfer;*/
     }
     
-    public TransferDTO transferToDto(Transfer transfer){
+    public static TransferDTO transferToDto(Transfer transfer){
         return TransferDTO.builder()
-                .id_transfer(transfer.getId_transfer())
-                .monto(transfer.getMonto())
-                .fecha(transfer.getFecha())
-                .id_cta_origen(transfer.getId_cta_origen())
-                .id_cta_destino(transfer.getId_cta_destino())
+                .id(transfer.getId())
+                .amount(transfer.getAmount())
+                .originAccount(transfer.getOriginAccount())
+                .targetAccount(transfer.getTargetAccount())
+                .dateTime(transfer.getDateTime())
                 .build();
-        /*TransferDTO dto = new TransferDTO();
-        dto.setId_transfer(transfer.getId_transfer());
-        dto.setMonto(transfer.getMonto());
-        dto.setId_cta_origen(transfer.getId_cta_origen());
-        dto.setId_cta_destino(transfer.getId_cta_destino());
-        dto.setFecha(transfer.getFecha());
-        return dto;*/
-    }   
+    }
 }

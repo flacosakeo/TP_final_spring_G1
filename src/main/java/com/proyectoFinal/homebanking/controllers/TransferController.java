@@ -26,7 +26,7 @@ public class TransferController {
     
     @GetMapping
     public ResponseEntity<List<TransferDTO>> getTransfer(){
-        List<TransferDTO> lista=service.getTransfer();
+        List<TransferDTO> lista=service.getTransfers();
         //llamar al servicio de usuarios para obtener la lista de usuarios
         return ResponseEntity.status(HttpStatus.OK).body(lista);
     }
@@ -42,7 +42,6 @@ public class TransferController {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createTransfer(transfer));
     }
 
-    //Decicimos no implementar la modificacion de una transferencia. Explicacion en el servicio.
     @PutMapping(value="/{id}")
     public ResponseEntity<TransferDTO> updateTransfer(@PathVariable Long id, @RequestBody TransferDTO transfer){
         return ResponseEntity.status(HttpStatus.OK).body(service.updateTransfer(id, transfer));
