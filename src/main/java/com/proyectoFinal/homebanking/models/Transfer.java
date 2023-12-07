@@ -7,29 +7,30 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.util.Date;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name="transferencias")
+@Table(name="transfers")
 @Getter
 @Setter
 public class Transfer {
-    @Id//establece que este campo es PK
-    @GeneratedValue(strategy=GenerationType.IDENTITY)//establece que el campo es autoincremenatl
-    @Column(name="id_transferencia")
-    private Long id_transfer;
+    @Id // Establece que este campo es PK
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Establece que el campo es autoincremental
+    @Column(name = "id_transfer")
+    private Long id;
     
-    @Column(name="Importe")
-    private Double monto;
+    private BigDecimal amount;
     
-    @Column(name="Cta origen")
-    private Long id_cta_origen;
+    @Column(name = "source_account")
+    private Long sourceAccount;
     
-    @Column(name="Cta destino")
-    private Long id_cta_destino;
-    
-    @Column(name="Fecha")
-    private Date fecha;
+    @Column(name = "target_account")
+    private Long targetAccount;
+
+    @Column(name = "date_time")
+    private LocalDateTime dateTime;
 }

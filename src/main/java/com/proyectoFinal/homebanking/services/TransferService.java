@@ -1,6 +1,6 @@
 package com.proyectoFinal.homebanking.services;
 
-import com.proyectoFinal.homebanking.exceptions.UserNotExistsException;
+import com.proyectoFinal.homebanking.exceptions.TransferNotExistsException;
 import com.proyectoFinal.homebanking.mappers.TransferMapper;
 import com.proyectoFinal.homebanking.models.DTO.TransferDTO;
 import com.proyectoFinal.homebanking.models.Transfer;
@@ -39,29 +39,36 @@ public class TransferService {
             repository.deleteById(id);
             return "Transferencia Eliminada";
         }else{
-            throw new  UserNotExistsException("Transferencia no existe");
+            throw new TransferNotExistsException("¡La transferencia con id " + id + " no existe!");
         }       
     }
-    
-    public TransferDTO updateTransfer(Long id, TransferDTO dto){
+
+    // Decicimos no implementar la modificacion de una transferencia. Ya que creemos que una transferencia no deberia
+    // ser modificable, por el hecho de que queremos que quede registrado cada movimiento.
+    // Si hace falta realizar una modificacion, por ejemplo si se transfirio erroneamente, deberia realizarse otra
+    // transferencia con el mismo monto y id de la cuentas de origen y destino de forma invertida.
+    // Nos parece poco etico que se pueda modificar una transferencia.
+    // TODO (#Ref. 2): agregar atributo en entidad TRANSFER que indique quien realiza o el estado de la transferencia.
+    /*public TransferDTO updateTransfer(Long id, TransferDTO dto){
         if(repository.existsById(id)){
-            Transfer transferToModify=repository.findById(id).get();
+            Transfer transferToModify = repository.findById(id).get();
             //logica del patch
-            if (dto.getMonto()!=null){
-                transferToModify.setMonto(dto.getMonto());
-            }
-            if (dto.getId_cta_origen()!=null){
-                transferToModify.setId_cta_origen(dto.getId_cta_origen());
-            }
-            if (dto.getId_cta_destino()!=null){
-                transferToModify.setId_cta_destino(dto.getId_cta_destino());
-            }
-            if (dto.getFecha()!=null){
-                transferToModify.setFecha(dto.getFecha());
-            }
-            repository.save(transferToModify);
-            return TransferMapper.transferToDto(transferToModify);
+            if(dto.getAmount() != null)
+                transferToModify.setAmount(dto.getAmount());
+
+            if(dto.getSourceAccount() != null)
+                transferToModify.setSourceAccount(dto.getSourceAccount());
+
+            if (dto.getTargetAccount() != null)
+                transferToModify.setTargetAccount(dto.getTargetAccount());
+
+            if (dto.getDateTime() != null)
+                transferToModify.setDateTime(dto.getDateTime());
+
+            Transfer transferModified = repository.save(transferToModify);
+            return TransferMapper.transferToDto(transferModified);
         }
-        return null;
-    }
+
+        throw new TransferNotExistsException("¡La transferencia con id " + id + " no existe!");
+    }*/
 }
