@@ -1,4 +1,3 @@
-
 package com.proyectoFinal.homebanking.services;
 
 import com.proyectoFinal.homebanking.exceptions.EntityNotFoundException;
@@ -12,7 +11,6 @@ import com.proyectoFinal.homebanking.repositories.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.catalina.mapper.Mapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,13 +29,13 @@ public class UserService {
     }
     
     public UserDTO createUser(UserDTO dto){
-        if( repository.existsByEmail(dto.getEmail()) )
+        if( existUserByEmail(dto.getEmail()) )
             throw new EntityAttributeExistsException("¡Email " + dto.getEmail() + " ya registrado!");
 
-        if( repository.existsByDni(dto.getDni()) )
+        if( existUserByDni(dto.getDni()) )
             throw new EntityAttributeExistsException("¡Ya existe un usuario con el DNI: " + dto.getDni() + "!");
 
-        if( repository.existsByUsername(dto.getUsername()) )
+        if( existUserByUsername(dto.getUsername()) )
             throw new EntityAttributeExistsException("¡Ya existe un usuario con el USERNAME " + dto.getUsername() + "!");
 
         // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
@@ -121,12 +119,21 @@ public class UserService {
         return null;
     }
 
+    //region ----------------------------  VALIDACIONES  ----------------------------
     // TODO: refactorizar los metodos de validaciones que estan en los if del createUser(),
     //  modularizarlas de esta forma pero con su logica, y luego moverlos al
     //  package: /tools/validations/userValidationsClass
     // Validar que existan usuarios unicos por mail
-    public User validateUserByEmail(String email) {
-        return repository.findByEmail(email);
+    public Boolean existUserByEmail(String email) {
+        return repository.existsByEmail(email);
+    }
+
+    public Boolean existUserByDni(String dni) {
+        return repository.existsByDni(dni);
+    }
+
+    public Boolean existUserByUsername(String username) {
+        return repository.existsByUsername(username);
     }
 
     public boolean validateUserDtoAttributes(UserDTO dto) {
@@ -136,6 +143,7 @@ public class UserService {
                 dto.getUsername() != null &&
                 dto.getDni() != null;
     }
+    // endregion
 
     public class Mensaje{
         private String mensaje;
