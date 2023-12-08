@@ -1,10 +1,7 @@
 package com.proyectoFinal.homebanking.services;
 
-
+import com.proyectoFinal.homebanking.exceptions.EntityNotFoundException;
 import com.proyectoFinal.homebanking.exceptions.InsufficientFoundsException;
-import com.proyectoFinal.homebanking.exceptions.AccountNotFoundException;
-import com.proyectoFinal.homebanking.exceptions.TransferNotExistsException;
-import com.proyectoFinal.homebanking.exceptions.TransferNotFoundException;
 import com.proyectoFinal.homebanking.mappers.TransferMapper;
 import com.proyectoFinal.homebanking.models.Account;
 import com.proyectoFinal.homebanking.models.DTO.TransferDTO;
@@ -41,7 +38,7 @@ public class TransferService {
     
     public TransferDTO getTransferById(Long id){
         Transfer transfer = transferRepository.findById(id).orElseThrow(() ->
-            new TransferNotFoundException("Transferencia no encontrada id: " + id));
+            new EntityNotFoundException("¡La transferencia con id " + id + " NO fue encontrada!"));
         return TransferMapper.transferToDto(transfer);
     }
     
@@ -50,7 +47,7 @@ public class TransferService {
             transferRepository.deleteById(id);
             return "¡La transferencia con id " + id + " ha sido eliminada!";
         }else{
-            throw new TransferNotExistsException("¡La transferencia con id " + id + " no existe!");
+            throw new EntityNotFoundException("¡La transferencia con id " + id + " NO fue encontrada!");
         }
     }
 
@@ -58,10 +55,10 @@ public class TransferService {
     public TransferDTO createTransfer(TransferDTO dto){
         //verificar que las cuentas origen y destino existan
         Account originAccount = accountRepository.findById(dto.getOriginAccount())
-                             .orElseThrow(()-> new AccountNotFoundException("Cuenta origen no existe, id: " + dto.getOriginAccount()));
+                             .orElseThrow(()-> new EntityNotFoundException("Cuenta origen no existe, id: " + dto.getOriginAccount()));
 
         Account destinationAccount = accountRepository.findById(dto.getTargetAccount())
-                             .orElseThrow(()-> new AccountNotFoundException("Cuenta destino no existe, id: " + dto.getTargetAccount()));
+                             .orElseThrow(()-> new EntityNotFoundException("Cuenta destino no existe, id: " + dto.getTargetAccount()));
         
         //verifica si la cuenta origen tiene fondos
         if (originAccount.getMonto().compareTo(dto.getAmount()) < 0){
@@ -112,7 +109,7 @@ public class TransferService {
             Transfer transferModified = transferRepository.save(transferToModify);
             return TransferMapper.transferToDto(transferModified);
         }
-        throw new TransferNotExistsException("¡La transferencia con id " + id + " no existe!");
+        throw new EntityNotFoundException("¡La transferencia con id " + id + " NO fue encontrada!");
     }
 }
 

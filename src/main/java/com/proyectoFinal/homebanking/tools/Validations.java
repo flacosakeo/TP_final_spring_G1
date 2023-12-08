@@ -1,9 +1,6 @@
 package com.proyectoFinal.homebanking.tools;
 
 import com.proyectoFinal.homebanking.exceptions.AccountsAreTheSameException;
-import com.proyectoFinal.homebanking.exceptions.UserNotExistsException;
-import com.proyectoFinal.homebanking.repositories.AccountRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
 

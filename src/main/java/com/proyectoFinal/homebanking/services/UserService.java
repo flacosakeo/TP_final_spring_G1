@@ -1,14 +1,15 @@
 
 package com.proyectoFinal.homebanking.services;
 
-import com.proyectoFinal.homebanking.exceptions.UserAttributeExistsException;
+import com.proyectoFinal.homebanking.exceptions.EntityNotFoundException;
+import com.proyectoFinal.homebanking.exceptions.EntityAttributeExistsException;
 import com.proyectoFinal.homebanking.mappers.UserMapper;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.models.User;
 import com.proyectoFinal.homebanking.repositories.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,13 +29,13 @@ public class UserService {
     
     public UserDTO createUser(UserDTO dto){
         if( repository.existsByEmail(dto.getEmail()) )
-            throw new UserAttributeExistsException("¡Email " + dto.getEmail() + " ya registrado!");
+            throw new EntityAttributeExistsException("¡Email " + dto.getEmail() + " ya registrado!");
 
         if( repository.existsByDni(dto.getDni()) )
-            throw new UserAttributeExistsException("¡Ya existe un usuario con el DNI: " + dto.getDni() + "!");
+            throw new EntityAttributeExistsException("¡Ya existe un usuario con el DNI: " + dto.getDni() + "!");
 
         if( repository.existsByUsername(dto.getUsername()) )
-            throw new UserAttributeExistsException("¡Ya existe un usuario con el USERNAME " + dto.getUsername() + "!");
+            throw new EntityAttributeExistsException("¡Ya existe un usuario con el USERNAME " + dto.getUsername() + "!");
 
         // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
         User userSaved = repository.save(UserMapper.dtoToUser(dto));
@@ -42,10 +43,11 @@ public class UserService {
     }
     
     public UserDTO getUserById(Long id){
-        User entity = repository.findById(id).get();
+        User entity = repository.findById(id).orElseThrow( () ->
+                new EntityNotFoundException("¡El usuario con ID " + id + " NO fue encontrado!"));
         return UserMapper.userToDto(entity);
     }
-    
+
     public String deleteUser(Long id){
         if (repository.existsById(id)){
             repository.deleteById(id);
@@ -98,7 +100,5 @@ public class UserService {
         public void setMensaje(String mensaje) {
             this.mensaje = mensaje;
         }
-        
-        
     }
 }

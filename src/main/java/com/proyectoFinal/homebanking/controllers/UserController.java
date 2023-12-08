@@ -1,8 +1,6 @@
 package com.proyectoFinal.homebanking.controllers;
 
-import com.proyectoFinal.homebanking.exceptions.UserNotExistsException;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
-import com.proyectoFinal.homebanking.models.User;
 import com.proyectoFinal.homebanking.services.UserService;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -72,7 +70,7 @@ public class UserController {
 
         if(!usernameIsValid(dto.getUsername())){
             //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("¡Nombre invalido! Debe tener entre 4 y 8 caracteres." +
+            return ResponseEntity.status(HttpStatus.CREATED).body("¡Username invalido! Debe tener entre 4 y 8 caracteres." +
                     " Solo admite letras o números");
         }
 
