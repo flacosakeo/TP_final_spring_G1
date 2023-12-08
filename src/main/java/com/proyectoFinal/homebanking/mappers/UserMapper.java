@@ -9,7 +9,6 @@ public class UserMapper {
    //metodos para transformar objetos
     public static User dtoToUser(UserDTO dto){
         User user= new User();
-        user.setId(dto.getId());
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
         user.setName(dto.getName());

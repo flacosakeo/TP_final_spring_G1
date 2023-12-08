@@ -1,7 +1,7 @@
 
 package com.proyectoFinal.homebanking.services;
 
-import com.proyectoFinal.homebanking.exceptions.UserNotExistsException;
+import com.proyectoFinal.homebanking.exceptions.UserAttributeExistsException;
 import com.proyectoFinal.homebanking.mappers.UserMapper;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.models.User;
@@ -13,36 +13,32 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    @Autowired
     private UserRepository repository;
-    //private UserMapper mapper;
 
-    
-    public List<UserDTO> getUsers(){
+    public UserService(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<UserDTO> getUsers() {
         List<User> users = repository.findAll();
-        List<UserDTO> usersDTO=users.stream()
+        return users.stream()
                 .map(UserMapper::userToDto)                
                 .collect(Collectors.toList());
-        return usersDTO;
     }
     
-    public Object createUser(UserDTO userDTO){
-        User userValidate = repository.findByEmail(userDTO.getEmail());
-        User userValidateDni = repository.findByDni(userDTO.getDni());
-        if(userValidate==null){
-            if(userValidateDni==null){
-                //User userValidateDni = repository.findByDni(userDTO.getDni());
-                //if(userValidateDni==null){
-                User user = repository.save(UserMapper.dtoToUser(userDTO));
-                return UserMapper.userToDto(user);
-            }else{
-                return ("Dni ya existen: "+userValidateDni.getDni());
-                //String mensaje="Dni ya existe";
-                //return new Mensaje(mensaje);
-            }
-        }else{
-            return("Email ya existen: "+userValidate.getEmail());
-        }        
+    public UserDTO createUser(UserDTO dto){
+        if( repository.existsByEmail(dto.getEmail()) )
+            throw new UserAttributeExistsException("¡Email " + dto.getEmail() + " ya registrado!");
+
+        if( repository.existsByDni(dto.getDni()) )
+            throw new UserAttributeExistsException("¡Ya existe un usuario con el DNI: " + dto.getDni() + "!");
+
+        if( repository.existsByUsername(dto.getUsername()) )
+            throw new UserAttributeExistsException("¡Ya existe un usuario con el USERNAME " + dto.getUsername() + "!");
+
+        // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
+        User userSaved = repository.save(UserMapper.dtoToUser(dto));
+        return UserMapper.userToDto(userSaved);
     }
     
     public UserDTO getUserById(Long id){
