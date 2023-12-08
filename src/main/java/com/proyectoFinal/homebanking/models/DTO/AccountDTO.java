@@ -3,16 +3,14 @@ package com.proyectoFinal.homebanking.models.DTO;
 import com.proyectoFinal.homebanking.models.Enum.AccountAlias;
 import com.proyectoFinal.homebanking.models.Enum.AccountType;
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class AccountDTO {
     private Long id;
     private AccountType tipo;

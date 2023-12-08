@@ -11,14 +11,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.ManyToOne;
 import java.math.BigDecimal;
-import java.math.BigInteger;
-import lombok.Getter;
-import lombok.Setter;
+
+import lombok.*;
 
 @Entity
-@Table(name="cuentas")
+@Table(name="accounts")
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Account {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
