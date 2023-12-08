@@ -1,12 +1,10 @@
 
 package com.proyectoFinal.homebanking.services;
 
-import com.proyectoFinal.homebanking.exceptions.UserNotExistsException;
 import com.proyectoFinal.homebanking.mappers.AccountMapper;
 import com.proyectoFinal.homebanking.models.Account;
 import com.proyectoFinal.homebanking.models.DTO.AccountDTO;
 import com.proyectoFinal.homebanking.models.Enum.AccountAlias;
-import com.proyectoFinal.homebanking.models.Enum.AccountType;
 import com.proyectoFinal.homebanking.repositories.AccountRepository;
 import java.util.List;
 import java.util.Random;

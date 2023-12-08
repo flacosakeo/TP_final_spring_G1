@@ -6,26 +6,25 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class UserMapper {
-   //metodos para transformar objetos
+   // Métodos para transformar objetos
     public static User dtoToUser(UserDTO dto){
-        User user= new User();
-        user.setId(dto.getId());
-        user.setEmail(dto.getEmail());
-        user.setPassword(dto.getPassword());
-        user.setName(dto.getName());
-        user.setUsername(dto.getUsername());
-        user.setDni(dto.getDni());
-        return user;
+        return User.builder()
+                .email(dto.getEmail())
+                .password(dto.getPassword())
+                .name(dto.getName())
+                .username(dto.getUsername())
+                .dni(dto.getDni())
+                .build();
     }
     
     public static UserDTO userToDto(User user){
-        UserDTO dto = new UserDTO();
-        dto.setId(user.getId());
-        dto.setEmail(user.getEmail());
-        dto.setPassword(user.getPassword());
-        dto.setName(user.getName());
-        dto.setUsername(user.getUsername());
-        dto.setDni(user.getDni());
-        return dto;
+        return UserDTO.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .name(user.getName())
+                .username(user.getUsername())
+                .dni(user.getDni())
+                .build();
     }
 }

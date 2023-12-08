@@ -1,7 +1,8 @@
 package com.proyectoFinal.homebanking.services;
 
-
-import com.proyectoFinal.homebanking.exceptions.*;
+import com.proyectoFinal.homebanking.exceptions.AccountsAreTheSameException;
+import com.proyectoFinal.homebanking.exceptions.EntityNotFoundException;
+import com.proyectoFinal.homebanking.exceptions.InsufficientFoundsException;
 import com.proyectoFinal.homebanking.mappers.TransferMapper;
 import com.proyectoFinal.homebanking.models.Account;
 import com.proyectoFinal.homebanking.models.DTO.TransferDTO;
@@ -13,16 +14,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import com.proyectoFinal.homebanking.tools.ErrorMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TransferService {
-    @Autowired
-    private TransferRepository transferRepository;
-
-    private AccountRepository accountRepository;
+    private final TransferRepository transferRepository;
+    private final AccountRepository accountRepository;
     
     public TransferService(TransferRepository transferRepository, AccountRepository accountRepository){
         this.transferRepository = transferRepository;
@@ -39,16 +39,17 @@ public class TransferService {
     
     public TransferDTO getTransferById(Long id){
         Transfer transfer = transferRepository.findById(id).orElseThrow(() ->
-            new TransferNotFoundException("Transferencia no encontrada id: " + id));
+            new EntityNotFoundException(ErrorMessage.transferNotFound(id)));
+
         return TransferMapper.transferToDto(transfer);
     }
     
     public String deleteTransfer(Long id){
         if (transferRepository.existsById(id)){
             transferRepository.deleteById(id);
-            return "¡La transferencia con id " + id + " ha sido eliminada!";
+            return ErrorMessage.transferSuccessfullyDeleted(id);
         }else{
-            throw new TransferNotExistsException("¡La transferencia con id " + id + " no existe!");
+            throw new EntityNotFoundException(ErrorMessage.transferNotFound(id));
         }
     }
 
@@ -62,15 +63,17 @@ public class TransferService {
         }
 
         //verificar que las cuentas origen y destino existan
-        Account originAccount = accountRepository.findById(dto.getOriginAccount())
-                             .orElseThrow(()-> new AccountNotFoundException("Cuenta origen no existe, id: " + dto.getOriginAccount()));
+        Account originAccount = accountRepository.findById( dto.getOriginAccount() )
+                             .orElseThrow( () -> new EntityNotFoundException( ErrorMessage.originAccountNotFound(
+                                     dto.getOriginAccount() )));
 
         Account destinationAccount = accountRepository.findById(dto.getTargetAccount())
-                             .orElseThrow(()-> new AccountNotFoundException("Cuenta destino no existe, id: " + dto.getTargetAccount()));
+                             .orElseThrow(() -> new EntityNotFoundException(ErrorMessage.destinationAccountNotFound(
+                                     dto.getTargetAccount() )));
         
         //verifica si la cuenta origen tiene fondos
         if (originAccount.getMonto().compareTo(dto.getAmount()) < 0){
-            throw new InsufficientFoundsException("Fondos insuficientes, id: " + dto.getOriginAccount());
+            throw new InsufficientFoundsException( ErrorMessage.insufficientFounds(dto.getOriginAccount()));
         }
         
         //se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
@@ -100,8 +103,9 @@ public class TransferService {
     // TODO (#Ref. 2): agregar atributo en entidad TRANSFER que indique quien realiza o el estado de la transferencia.
     public TransferDTO updateTransfer(Long id, TransferDTO dto){
         if(transferRepository.existsById(id)){
-            Transfer transferToModify = transferRepository.findById(id).get();
-            //logica del patch
+            Transfer transferToModify = transferRepository.findById(id).orElseThrow( () ->
+                    new EntityNotFoundException("¡La transferencia con ID '" + id + "' NO fue encontrado!"));
+            // LÓGICA DEL PATCH
             if(dto.getAmount() != null)
                 transferToModify.setAmount(dto.getAmount());
 
@@ -117,7 +121,7 @@ public class TransferService {
             Transfer transferModified = transferRepository.save(transferToModify);
             return TransferMapper.transferToDto(transferModified);
         }
-        throw new TransferNotExistsException("¡La transferencia con id " + id + " no existe!");
+        throw new EntityNotFoundException(ErrorMessage.transferNotFound(id));
     }
 }
 

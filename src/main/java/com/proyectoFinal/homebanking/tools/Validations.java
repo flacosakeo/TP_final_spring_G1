@@ -1,14 +1,6 @@
 package com.proyectoFinal.homebanking.tools;
 
-import com.proyectoFinal.homebanking.exceptions.AccountsAreTheSameException;
-import com.proyectoFinal.homebanking.exceptions.UserNotExistsException;
-import com.proyectoFinal.homebanking.repositories.AccountRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 import java.math.BigDecimal;
-import java.util.Objects;
 
 public class Validations {
 
@@ -38,4 +30,3 @@ public class Validations {
         }
     }
 }
-

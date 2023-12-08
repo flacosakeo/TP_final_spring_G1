@@ -1,55 +1,55 @@
-
 package com.proyectoFinal.homebanking.services;
 
-import com.proyectoFinal.homebanking.exceptions.UserNotExistsException;
+import com.proyectoFinal.homebanking.exceptions.EntityNotFoundException;
+import com.proyectoFinal.homebanking.exceptions.EntityAttributeExistsException;
+import com.proyectoFinal.homebanking.exceptions.EntityNullAttributesException;
+import com.proyectoFinal.homebanking.exceptions.FatalErrorException;
 import com.proyectoFinal.homebanking.mappers.UserMapper;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.models.User;
 import com.proyectoFinal.homebanking.repositories.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import com.proyectoFinal.homebanking.tools.validations.UserValidations;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    @Autowired
-    private UserRepository repository;
-    //private UserMapper mapper;
+    private final UserRepository repository;
 
-    
-    public List<UserDTO> getUsers(){
+    public UserService(UserRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<UserDTO> getUsers() {
         List<User> users = repository.findAll();
-        List<UserDTO> usersDTO=users.stream()
+        return users.stream()
                 .map(UserMapper::userToDto)                
                 .collect(Collectors.toList());
-        return usersDTO;
     }
     
-    public Object createUser(UserDTO userDTO){
-        User userValidate = repository.findByEmail(userDTO.getEmail());
-        User userValidateDni = repository.findByDni(userDTO.getDni());
-        if(userValidate==null){
-            if(userValidateDni==null){
-                //User userValidateDni = repository.findByDni(userDTO.getDni());
-                //if(userValidateDni==null){
-                User user = repository.save(UserMapper.dtoToUser(userDTO));
-                return UserMapper.userToDto(user);
-            }else{
-                return ("Dni ya existen: "+userValidateDni.getDni());
-                //String mensaje="Dni ya existe";
-                //return new Mensaje(mensaje);
-            }
-        }else{
-            return("Email ya existen: "+userValidate.getEmail());
-        }        
+    public UserDTO createUser(UserDTO dto){
+        if(UserValidations.existUserByEmail(dto.getEmail()) )
+            throw new EntityAttributeExistsException("¡Email " + dto.getEmail() + " ya registrado!");
+
+        if( UserValidations.existUserByDni(dto.getDni()) )
+            throw new EntityAttributeExistsException("¡Ya existe un usuario con el DNI: " + dto.getDni() + "!");
+
+        if( UserValidations.existUserByUsername(dto.getUsername()) )
+            throw new EntityAttributeExistsException("¡Ya existe un usuario con el USERNAME " + dto.getUsername() + "!");
+
+        // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
+        User userSaved = repository.save(UserMapper.dtoToUser(dto));
+        return UserMapper.userToDto(userSaved);
     }
     
     public UserDTO getUserById(Long id){
-        User entity = repository.findById(id).get();
+        User entity = repository.findById(id).orElseThrow( () ->
+                new EntityNotFoundException("¡El usuario con ID '" + id + "' NO fue encontrado!"));
         return UserMapper.userToDto(entity);
     }
-    
+
     public String deleteUser(Long id){
         if (repository.existsById(id)){
             repository.deleteById(id);
@@ -62,47 +62,64 @@ public class UserService {
     
     public UserDTO updateUser(Long id, UserDTO dto){
         if(repository.existsById(id)){
-            User userToModify=repository.findById(id).get();
-            //logica del patch
-            if (dto.getName()!=null){
+            User userToModify = repository.findById(id).orElseThrow( () ->
+                    new EntityNotFoundException("¡El usuario con ID '" + id + "' NO fue encontrado!"));
+
+            // LÓGICA DEL PATCH
+            if(dto.getName() != null)
                 userToModify.setName(dto.getName());
-            }
-            if (dto.getUsername()!=null){
+            
+            if(dto.getUsername() != null)
                 userToModify.setUsername(dto.getUsername());
-            }
-            if (dto.getEmail()!=null){
-                userToModify.setEmail(dto.getEmail());
-            }
-            if (dto.getDni()!=null){
+            
+            if(dto.getDni() != null)
                 userToModify.setDni(dto.getDni());
-            }
-            if (dto.getPassword()!=null){
+            
+            if(dto.getEmail() != null)
+                userToModify.setEmail(dto.getEmail());
+            
+            if(dto.getPassword() != null)
                 userToModify.setPassword(dto.getPassword());
-            }
-            repository.save(userToModify);
-            return UserMapper.userToDto(userToModify);
+            
+            User userModified = repository.save(userToModify);
+            return UserMapper.userToDto(userModified);
         }
+        throw new EntityNotFoundException("¡El usuario con ID '" + id + "' no fue encontrado!");
+    }
+
+    public UserDTO updateAllUser(Long id, UserDTO dto) {
+        // Primero verifico si existe un usuario con ese id en la BD
+        // Y tambien se valida que todos los datos del "dto" no vienen en null
+        if(repository.existsById(id) && UserValidations.validateUserDtoAttributes(dto)) {
+
+            // Consigo el usuario a modificar desde la BD
+            User userToModify = repository.findById(id).orElseThrow( () ->
+                    new EntityNotFoundException("¡El usuario con ID '" + id + "' NO fue encontrado!"));
+
+            // LÓGICA DEL PUT
+            userToModify.setEmail(dto.getEmail());
+            userToModify.setPassword(dto.getPassword());
+            userToModify.setName(dto.getName());
+            userToModify.setUsername(dto.getUsername());
+            userToModify.setDni(dto.getDni());
+
+            // Persistimos la modificacion del usuario en la BD
+            User userModified = repository.save(userToModify);
+
+            return UserMapper.userToDto(userModified);
+        }
+
+        if(!repository.existsById(id) && !UserValidations.validateUserDtoAttributes(dto))
+            throw new FatalErrorException("El usuario con id '" + id +
+                    "' NO fue encontrado! Y uno o varios atributos son nulos");
+
+        if(!repository.existsById(id))
+            throw new EntityNotFoundException("¡El usuario con id '" + id + "' NO fue encontrado!");
+
+        if(!UserValidations.validateUserDtoAttributes(dto))
+            throw new EntityNullAttributesException("¡Uno o varios de los atributos enviados son nulos!");
+
         return null;
     }
-    
-    public class Mensaje{
-        private String mensaje;
 
-        public Mensaje(String mensaje) {
-            this.mensaje = mensaje;
-        }
-
-        public Mensaje() {
-        }
-
-        public String getMensaje() {
-            return mensaje;
-        }
-
-        public void setMensaje(String mensaje) {
-            this.mensaje = mensaje;
-        }
-        
-        
-    }
 }
