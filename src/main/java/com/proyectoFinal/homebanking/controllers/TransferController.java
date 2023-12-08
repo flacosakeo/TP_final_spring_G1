@@ -45,6 +45,10 @@ public class TransferController {
         Long originAccount = transfer.getOriginAccount();
         Long targetAccount = transfer.getTargetAccount();
 
+        if(originAccount == null || targetAccount == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La cuenta de origen o la cuenta de destino es requerida.");
+        }
+
         if (transfer.getAmount() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monto es requerido.");
         }
