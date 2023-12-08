@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-    @Autowired
     private final UserService service;
 
     public UserController(UserService service) {
@@ -87,6 +85,7 @@ public class UserController {
     }
 
     //TODO: REFACTORIZAR, MOVER TODOS ESTOS METODOS A CLASE VALIDATIONS Y VOLVERLOS ESTATICOS
+    //TODO: REFACTORIZAR, para tener en cuenta si lo que se pasa es nulo... porque ahi se rompe el matcher
     // Valida que el dni tenga 8 digitos
     public Boolean dniNumberDigitsIsValid(String dni) {
         // DNI a verificar viene por el parametro.

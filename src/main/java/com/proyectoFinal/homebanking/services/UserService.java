@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    private UserRepository repository;
+    private final UserRepository repository;
 
     public UserService(UserRepository repository) {
         this.repository = repository;
@@ -62,7 +62,8 @@ public class UserService {
     
     public UserDTO updateUser(Long id, UserDTO dto){
         if(repository.existsById(id)){
-            User userToModify = repository.findById(id).get();
+            User userToModify = repository.findById(id).orElseThrow( () ->
+                    new EntityNotFoundException("¡El usuario con ID '" + id + "' NO fue encontrado!"));
 
             // LÓGICA DEL PATCH
             if(dto.getName() != null)
@@ -92,7 +93,8 @@ public class UserService {
         if(repository.existsById(id) && UserValidations.validateUserDtoAttributes(dto)) {
 
             // Consigo el usuario a modificar desde la BD
-            User userToModify = repository.findById(id).get();
+            User userToModify = repository.findById(id).orElseThrow( () ->
+                    new EntityNotFoundException("¡El usuario con ID '" + id + "' NO fue encontrado!"));
 
             // LÓGICA DEL PUT
             userToModify.setEmail(dto.getEmail());
@@ -120,22 +122,4 @@ public class UserService {
         return null;
     }
 
-    public class Mensaje{
-        private String mensaje;
-
-        public Mensaje(String mensaje) {
-            this.mensaje = mensaje;
-        }
-
-        public Mensaje() {
-        }
-
-        public String getMensaje() {
-            return mensaje;
-        }
-
-        public void setMensaje(String mensaje) {
-            this.mensaje = mensaje;
-        }
-    }
 }
