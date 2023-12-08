@@ -86,6 +86,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(service.deleteUser(id));
     }
 
+    //TODO: REFACTORIZAR, MOVER TODOS ESTOS METODOS A CLASE VALIDATIONS Y VOLVERLOS ESTATICOS
     // Valida que el dni tenga 8 digitos
     public Boolean dniNumberDigitsIsValid(String dni) {
         // DNI a verificar viene por el parametro.

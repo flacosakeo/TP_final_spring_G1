@@ -11,6 +11,7 @@ import com.proyectoFinal.homebanking.repositories.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.proyectoFinal.homebanking.tools.validations.UserValidations;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,13 +30,13 @@ public class UserService {
     }
     
     public UserDTO createUser(UserDTO dto){
-        if( existUserByEmail(dto.getEmail()) )
+        if(UserValidations.existUserByEmail(dto.getEmail()) )
             throw new EntityAttributeExistsException("¡Email " + dto.getEmail() + " ya registrado!");
 
-        if( existUserByDni(dto.getDni()) )
+        if( UserValidations.existUserByDni(dto.getDni()) )
             throw new EntityAttributeExistsException("¡Ya existe un usuario con el DNI: " + dto.getDni() + "!");
 
-        if( existUserByUsername(dto.getUsername()) )
+        if( UserValidations.existUserByUsername(dto.getUsername()) )
             throw new EntityAttributeExistsException("¡Ya existe un usuario con el USERNAME " + dto.getUsername() + "!");
 
         // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
@@ -88,7 +89,7 @@ public class UserService {
     public UserDTO updateAllUser(Long id, UserDTO dto) {
         // Primero verifico si existe un usuario con ese id en la BD
         // Y tambien se valida que todos los datos del "dto" no vienen en null
-        if(repository.existsById(id) && validateUserDtoAttributes(dto)) {
+        if(repository.existsById(id) && UserValidations.validateUserDtoAttributes(dto)) {
 
             // Consigo el usuario a modificar desde la BD
             User userToModify = repository.findById(id).get();
@@ -106,44 +107,18 @@ public class UserService {
             return UserMapper.userToDto(userModified);
         }
 
-        if(!repository.existsById(id) && !validateUserDtoAttributes(dto))
+        if(!repository.existsById(id) && !UserValidations.validateUserDtoAttributes(dto))
             throw new FatalErrorException("El usuario con id '" + id +
                     "' NO fue encontrado! Y uno o varios atributos son nulos");
 
         if(!repository.existsById(id))
             throw new EntityNotFoundException("¡El usuario con id '" + id + "' NO fue encontrado!");
 
-        if(!validateUserDtoAttributes(dto))
+        if(!UserValidations.validateUserDtoAttributes(dto))
             throw new EntityNullAttributesException("¡Uno o varios de los atributos enviados son nulos!");
 
         return null;
     }
-
-    //region ----------------------------  VALIDACIONES  ----------------------------
-    // TODO: refactorizar los metodos de validaciones que estan en los if del createUser(),
-    //  modularizarlas de esta forma pero con su logica, y luego moverlos al
-    //  package: /tools/validations/userValidationsClass
-    // Validar que existan usuarios unicos por mail
-    public Boolean existUserByEmail(String email) {
-        return repository.existsByEmail(email);
-    }
-
-    public Boolean existUserByDni(String dni) {
-        return repository.existsByDni(dni);
-    }
-
-    public Boolean existUserByUsername(String username) {
-        return repository.existsByUsername(username);
-    }
-
-    public boolean validateUserDtoAttributes(UserDTO dto) {
-        return dto.getEmail() != null &&
-                dto.getPassword() != null &&
-                dto.getName() != null &&
-                dto.getUsername() != null &&
-                dto.getDni() != null;
-    }
-    // endregion
 
     public class Mensaje{
         private String mensaje;
