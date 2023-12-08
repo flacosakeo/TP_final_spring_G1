@@ -1,10 +1,7 @@
 package com.proyectoFinal.homebanking.services;
 
 
-import com.proyectoFinal.homebanking.exceptions.InsufficientFoundsException;
-import com.proyectoFinal.homebanking.exceptions.AccountNotFoundException;
-import com.proyectoFinal.homebanking.exceptions.TransferNotExistsException;
-import com.proyectoFinal.homebanking.exceptions.TransferNotFoundException;
+import com.proyectoFinal.homebanking.exceptions.*;
 import com.proyectoFinal.homebanking.mappers.TransferMapper;
 import com.proyectoFinal.homebanking.models.Account;
 import com.proyectoFinal.homebanking.models.DTO.TransferDTO;
@@ -14,6 +11,7 @@ import com.proyectoFinal.homebanking.repositories.TransferRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,6 +54,13 @@ public class TransferService {
 
     @Transactional
     public TransferDTO createTransfer(TransferDTO dto){
+
+        //verifica si ambas cuentas son iguales
+        if(Objects.equals(dto.getOriginAccount(), dto.getTargetAccount())){
+            throw new AccountsAreTheSameException("Ambas cuentas son iguales: " + dto.getOriginAccount() +
+                    ", " + dto.getTargetAccount());
+        }
+
         //verificar que las cuentas origen y destino existan
         Account originAccount = accountRepository.findById(dto.getOriginAccount())
                              .orElseThrow(()-> new AccountNotFoundException("Cuenta origen no existe, id: " + dto.getOriginAccount()));

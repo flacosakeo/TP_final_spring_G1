@@ -42,8 +42,17 @@ public class TransferController {
     @PostMapping()
     public ResponseEntity<?> createTransfer(@RequestBody TransferDTO transfer){
 
+        Long originAccount = transfer.getOriginAccount();
+        Long targetAccount = transfer.getTargetAccount();
+
         if (transfer.getAmount() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monto es requerido.");
+        }
+
+        if(!Validations.isPositive(originAccount) || (!Validations.isPositive(targetAccount))){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Validations.validateTransferAccountId(originAccount,
+                        targetAccount));
         }
 
         // region Validar si amount es un número
@@ -63,7 +72,7 @@ public class TransferController {
 //        }
         // endregion
 
-        if(!Validations.amountIsValid(transfer.getAmount())){
+        if(!Validations.isPositive(transfer.getAmount())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monto invalido: $" + transfer.getAmount()
                     + ", Debe ingresar un monto mayor a $0.");
         }
