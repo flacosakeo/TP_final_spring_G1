@@ -76,7 +76,7 @@ public class AccountService {
                 accountToModify.setAlias(dto.getAlias());
             }
             if (dto.getMonto()!=null){
-                //accountToModify.setMonto(dto.getMonto());
+                accountToModify.setMonto(dto.getMonto());
             }
             repository.save(accountToModify);
             return AccountMapper.accountToDto(accountToModify);

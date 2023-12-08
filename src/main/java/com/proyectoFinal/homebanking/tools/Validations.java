@@ -5,6 +5,7 @@ import com.proyectoFinal.homebanking.exceptions.UserNotExistsException;
 import com.proyectoFinal.homebanking.repositories.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 public class Validations {
@@ -35,5 +36,11 @@ public class Validations {
         }
         return valid;
     }
+
+    public static boolean amountIsValid(BigDecimal amount){
+        return(amount.compareTo(BigDecimal.ZERO) > 0);
+    }
+
+
 
 }
