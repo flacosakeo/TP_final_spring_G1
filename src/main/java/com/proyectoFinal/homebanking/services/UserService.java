@@ -2,11 +2,19 @@
 package com.proyectoFinal.homebanking.services;
 
 import com.proyectoFinal.homebanking.exceptions.UserNotExistsException;
+import com.proyectoFinal.homebanking.mappers.AccountMapper;
 import com.proyectoFinal.homebanking.mappers.UserMapper;
+import com.proyectoFinal.homebanking.models.Account;
+import com.proyectoFinal.homebanking.models.DTO.AccountDTO;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
+import com.proyectoFinal.homebanking.models.Enum.AccountAlias;
+import com.proyectoFinal.homebanking.models.Enum.AccountType;
 import com.proyectoFinal.homebanking.models.User;
+import com.proyectoFinal.homebanking.repositories.AccountRepository;
 import com.proyectoFinal.homebanking.repositories.UserRepository;
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,7 +23,13 @@ import org.springframework.stereotype.Service;
 public class UserService {
     @Autowired
     private UserRepository repository;
+    private AccountService servicioCuenta;
+    
     //private UserMapper mapper;
+
+    public UserService(AccountService servicioCuenta) {
+        this.servicioCuenta = servicioCuenta;
+    }
 
     
     public List<UserDTO> getUsers(){
@@ -26,6 +40,7 @@ public class UserService {
         return usersDTO;
     }
     
+    //TODO tipo de retorno
     public Object createUser(UserDTO userDTO){
         User userValidate = repository.findByEmail(userDTO.getEmail());
         User userValidateDni = repository.findByDni(userDTO.getDni());
@@ -33,7 +48,15 @@ public class UserService {
             if(userValidateDni==null){
                 //User userValidateDni = repository.findByDni(userDTO.getDni());
                 //if(userValidateDni==null){
+                
                 User user = repository.save(UserMapper.dtoToUser(userDTO));
+                
+                AccountDTO accountDTO1 = new AccountDTO();
+                accountDTO1.setTipo(AccountType.CAJA_DE_AHORROS);
+                //accountDTO1.setUser_id(userDTO.getId());
+                accountDTO1.setDueño(userDTO.getName());
+                servicioCuenta.createAccount( accountDTO1);
+                
                 return UserMapper.userToDto(user);
             }else{
                 return ("Dni ya existen: "+userValidateDni.getDni());
@@ -85,24 +108,5 @@ public class UserService {
         return null;
     }
     
-    public class Mensaje{
-        private String mensaje;
 
-        public Mensaje(String mensaje) {
-            this.mensaje = mensaje;
-        }
-
-        public Mensaje() {
-        }
-
-        public String getMensaje() {
-            return mensaje;
-        }
-
-        public void setMensaje(String mensaje) {
-            this.mensaje = mensaje;
-        }
-        
-        
-    }
 }

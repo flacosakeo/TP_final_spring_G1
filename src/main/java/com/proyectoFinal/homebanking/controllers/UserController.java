@@ -67,7 +67,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(user));
         } else {
             //System.out.println("El número de DNI no es válido.");
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("El DNI no es valido "+user.getDni()+" debe contener 8 caracteres numericos");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El DNI no es valido "+user.getDni()+" debe contener 8 caracteres numericos");
         }
     }
         

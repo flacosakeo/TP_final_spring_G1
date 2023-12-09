@@ -8,6 +8,7 @@ import com.proyectoFinal.homebanking.models.DTO.AccountDTO;
 import com.proyectoFinal.homebanking.models.Enum.AccountAlias;
 import com.proyectoFinal.homebanking.models.Enum.AccountType;
 import com.proyectoFinal.homebanking.repositories.AccountRepository;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -33,7 +34,8 @@ public class AccountService {
         }*/
         accountDTO.setAlias(AccountAlias.values()[new Random().nextInt(AccountAlias.values().length)]);
         //accountDTO.setTipo (AccountType.values()[new Random().nextInt(AccountType.values().length)]);
-        //accountDTO.setMonto(0.0);
+        accountDTO.setMonto(BigDecimal.ZERO);
+        accountDTO.setCbu(generadorCbu());
         Account cbuValidate = repository.findByCbu(accountDTO.getCbu());
         if (cbuValidate==null){
             Account account = repository.save(AccountMapper.dtoToAccount(accountDTO));
@@ -86,5 +88,18 @@ public class AccountService {
     //}
         return null;
     }
-        
+
+    private String generadorCbu(){
+        int i=1;
+        String cadena="";
+        while (i<24){
+            int randomNum = (int)(Math.random() * 10);
+            //cbu.add(randomNum);
+            cadena += String.valueOf(randomNum);
+            //String cbuCadena=cadena;
+            i++;
+            //System.out.print(cbuCadena);
+        }
+        return cadena;
+    }
 }

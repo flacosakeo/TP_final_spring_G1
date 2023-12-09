@@ -1,5 +1,7 @@
 package com.proyectoFinal.homebanking.models.DTO;
 
+import com.proyectoFinal.homebanking.models.Account;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,4 +18,5 @@ public class UserDTO {
     private String name;
     private String username;
     private String dni;
+   
 }
