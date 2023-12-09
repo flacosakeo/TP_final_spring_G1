@@ -94,8 +94,9 @@ public class AccountController {
         return ResponseEntity.status(HttpStatus.OK).body(service.depositMoney(id, amount));
     }
 
-//    @PatchMapping(value="/{id}/deposit")
-//    public ResponseEntity<AccountDTO> extractMoney(@PathVariable Long id, @RequestBody BigDecimal amount){
-//        return ResponseEntity.status(HttpStatus.OK).body(service.extractMoney(id, amount));
-//    }
+    @PatchMapping(value="/{id}/extract")
+    public ResponseEntity<AccountDTO> extractMoney(@PathVariable Long id, @RequestBody Map<String, BigDecimal> requestBody){
+        BigDecimal amount = requestBody.get("monto");
+        return ResponseEntity.status(HttpStatus.OK).body(service.extractMoney(id, amount));
+    }
 }

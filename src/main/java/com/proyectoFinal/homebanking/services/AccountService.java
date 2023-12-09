@@ -2,6 +2,7 @@
 package com.proyectoFinal.homebanking.services;
 
 import com.proyectoFinal.homebanking.exceptions.EntityNotFoundException;
+import com.proyectoFinal.homebanking.exceptions.InsufficientFoundsException;
 import com.proyectoFinal.homebanking.mappers.AccountMapper;
 import com.proyectoFinal.homebanking.mappers.TransferMapper;
 import com.proyectoFinal.homebanking.models.Account;
@@ -114,18 +115,24 @@ public class AccountService {
         throw new EntityNotFoundException(ErrorMessage.accountNotFound(id));
     }
 
-//    public AccountDTO extractMoney(Long id, BigDecimal amount){
-//        if(repository.existsById(id)){
-//            Account accountToModify = repository.findById(id).orElseThrow( () ->
-//                    new EntityNotFoundException(ErrorMessage.accountNotFound(id)));
-//
-//            accountToModify.setMonto(accountToModify.getMonto().add(amount));
-//
-//            Account accountModified = repository.save(accountToModify);
-//            return AccountMapper.accountToDto(accountModified);
-//        }
-//        throw new EntityNotFoundException(ErrorMessage.accountNotFound(id));
-//
-//    }
+    public AccountDTO extractMoney(Long id, BigDecimal amount){
+        if(repository.existsById(id)){
+            Account accountToModify = repository.findById(id).orElseThrow( () ->
+                    new EntityNotFoundException(ErrorMessage.accountNotFound(id)));
+
+            //verifica si la cuenta origen tiene fondos
+            if (accountToModify.getMonto().compareTo(amount) < 0){
+                throw new InsufficientFoundsException( ErrorMessage.insufficientFounds(accountToModify.getId_account()));
+            }
+
+            //se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
+            accountToModify.setMonto(accountToModify.getMonto().subtract(amount));
+
+            Account accountModified = repository.save(accountToModify);
+            return AccountMapper.accountToDto(accountModified);
+        }
+        throw new EntityNotFoundException(ErrorMessage.accountNotFound(id));
+
+    }
 
 }
