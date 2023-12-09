@@ -5,7 +5,8 @@ import com.proyectoFinal.homebanking.services.TransferService;
 import java.util.List;
 
 import com.proyectoFinal.homebanking.tools.ErrorMessage;
-import com.proyectoFinal.homebanking.tools.Validations;
+import com.proyectoFinal.homebanking.tools.validations.ControllerValidation;
+import com.proyectoFinal.homebanking.tools.validations.TransferValidation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -53,9 +54,9 @@ public class TransferController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorMessage.requiredAmount());
         }
 
-        if(!Validations.isPositive(originAccountId) || (!Validations.isPositive(targetAccountId))){
+        if(!ControllerValidation.isPositive(originAccountId) || (!ControllerValidation.isPositive(targetAccountId))){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Validations.validateTransferAccountId(originAccountId,
+                .body(TransferValidation.validateTransferAccountId(originAccountId,
                         targetAccountId));
         }
 
@@ -76,7 +77,7 @@ public class TransferController {
 //        }
         // endregion
 
-        if(!Validations.isPositive(transfer.getAmount())){
+        if(!ControllerValidation.isPositive(transfer.getAmount())){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ErrorMessage.invalidAmount(transfer.getAmount()) );
         }
 
