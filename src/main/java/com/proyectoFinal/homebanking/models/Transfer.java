@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import lombok.*;
 
 @Entity
-@Table(name="transfers")
+@Table(name = "transfers")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,17 +22,17 @@ import lombok.*;
 @Builder
 public class Transfer {
     @Id // Establece que este campo es PK
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Establece que el campo es autoincremental
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Establece que el campo es auto incremental
     @Column(name = "id_transfer")
     private Long id;
     
     private BigDecimal amount;
     
     @Column(name = "origin_account")
-    private Long originAccount;
+    private Long originAccountId;
     
     @Column(name = "target_account")
-    private Long targetAccount;
+    private Long targetAccountId;
 
     @Column(name = "date_time")
     private LocalDateTime dateTime;

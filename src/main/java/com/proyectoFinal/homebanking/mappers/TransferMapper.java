@@ -9,8 +9,8 @@ public class TransferMapper {
     public static Transfer dtoToTransfer(TransferDTO dto){
         return Transfer.builder()
                 .amount(dto.getAmount())
-                .originAccount(dto.getOriginAccount())
-                .targetAccount(dto.getTargetAccount())
+                .originAccountId(dto.getOriginAccountId())
+                .targetAccountId(dto.getTargetAccountId())
                 .dateTime(dto.getDateTime())
                 .build();
     }
@@ -19,8 +19,8 @@ public class TransferMapper {
         return TransferDTO.builder()
                 .id(transfer.getId())
                 .amount(transfer.getAmount())
-                .originAccount(transfer.getOriginAccount())
-                .targetAccount(transfer.getTargetAccount())
+                .originAccountId(transfer.getOriginAccountId())
+                .targetAccountId(transfer.getTargetAccountId())
                 .dateTime(transfer.getDateTime())
                 .build();
     }
