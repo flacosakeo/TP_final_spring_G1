@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.proyectoFinal.homebanking.tools.ErrorMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,8 +32,8 @@ public class UserController {
     }
     
     @GetMapping(value="/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id){//el pathvariable guarda el id de la request
-                                                   //en la variable id de la funcion
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id){ // El @PathVariable guarda el id de la request
+                                                                       // en la variable id de la funcion
         return ResponseEntity.status(HttpStatus.OK).body(service.getUserById(id));
     }
     
@@ -41,29 +42,26 @@ public class UserController {
 
         // Verificar si el DNI es válido y asi con cada atributo
         if( !dniNumberDigitsIsValid(dto.getDni()) ) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("El DNI "
-                    + dto.getDni() + " no es valido! ¡Debe contener 8 caracteres numericos!");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body( ErrorMessage.dniNotFound(dto.getDni()) );
         }
 
         //TODO corregir status
         if(!emailIsValid(dto.getEmail()))
-            return ResponseEntity.status(HttpStatus.CREATED).body("¡Email invalido!");
+            return ResponseEntity.status(HttpStatus.CREATED).body( ErrorMessage.invalidEmail(dto.getEmail()) );
 
         if(!passwordIsValid(dto.getPassword())) {
             //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("¡Contraseña incorrecta! Debe contener al menos 8 caracteres");
+            return ResponseEntity.status(HttpStatus.CREATED).body( ErrorMessage.invalidPassword() );
         }
 
         if(!nameIsValid(dto.getName())){
             //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("¡Nombre invalido! " +
-                    "Debe comenzar en mayúscula y tener al menos 2 letras. Acepta nombres compuestos (hasta 3 palabras)");
+            return ResponseEntity.status(HttpStatus.CREATED).body( ErrorMessage.invalidName() );
         }
 
         if(!usernameIsValid(dto.getUsername())){
             //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("¡Username invalido! Debe tener entre 4 y 8 caracteres." +
-                    " Solo admite letras o números");
+            return ResponseEntity.status(HttpStatus.CREATED).body( ErrorMessage.usernameInvalid() );
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(dto));
