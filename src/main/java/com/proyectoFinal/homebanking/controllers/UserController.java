@@ -41,28 +41,24 @@ public class UserController {
 
         // Verificar si el DNI es válido y asi con cada atributo
         if( !dniNumberDigitsIsValid(dto.getDni()) ) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("El DNI "
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El DNI "
                     + dto.getDni() + " no es valido! ¡Debe contener 8 caracteres numericos!");
         }
 
-        //TODO corregir status
         if(!emailIsValid(dto.getEmail()))
-            return ResponseEntity.status(HttpStatus.CREATED).body("¡Email invalido!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("¡Email invalido!");
 
         if(!passwordIsValid(dto.getPassword())) {
-            //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("¡Contraseña incorrecta! Debe contener al menos 8 caracteres");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("¡Contraseña incorrecta! Debe contener al menos 8 caracteres");
         }
 
         if(!nameIsValid(dto.getName())){
-            //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("¡Nombre invalido! " +
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("¡Nombre invalido! " +
                     "Debe comenzar en mayúscula y tener al menos 2 letras. Acepta nombres compuestos (hasta 3 palabras)");
         }
 
         if(!usernameIsValid(dto.getUsername())){
-            //TODO corregir status
-            return ResponseEntity.status(HttpStatus.CREATED).body("¡Username invalido! Debe tener entre 4 y 8 caracteres." +
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("¡Username invalido! Debe tener entre 4 y 8 caracteres." +
                     " Solo admite letras o números");
         }
 
