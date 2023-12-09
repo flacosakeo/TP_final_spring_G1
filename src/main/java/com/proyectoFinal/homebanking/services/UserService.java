@@ -5,7 +5,9 @@ import com.proyectoFinal.homebanking.exceptions.EntityAttributeExistsException;
 import com.proyectoFinal.homebanking.exceptions.EntityNullAttributesException;
 import com.proyectoFinal.homebanking.exceptions.FatalErrorException;
 import com.proyectoFinal.homebanking.mappers.UserMapper;
+import com.proyectoFinal.homebanking.models.DTO.AccountDTO;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
+import com.proyectoFinal.homebanking.models.Enum.AccountType;
 import com.proyectoFinal.homebanking.models.User;
 import com.proyectoFinal.homebanking.repositories.UserRepository;
 import java.util.List;
@@ -18,9 +20,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
     private final UserRepository repository;
+    private final AccountService servicioCuenta;
 
-    public UserService(UserRepository repository) {
+    public UserService(UserRepository repository, AccountService servicioCuenta) {
         this.repository = repository;
+        this.servicioCuenta = servicioCuenta;
+
     }
 
     public List<UserDTO> getUsers() {
@@ -42,6 +47,13 @@ public class UserService {
 
         // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
         User userSaved = repository.save(UserMapper.dtoToUser(dto));
+
+        AccountDTO accountDTO1 = new AccountDTO();
+        accountDTO1.setTipo(AccountType.CAJA_DE_AHORRO);
+        //accountDTO1.setUser_id(userDTO.getId());
+        accountDTO1.setDueño(dto.getName());
+        servicioCuenta.createAccount( accountDTO1);
+
         return UserMapper.userToDto(userSaved);
     }
     
@@ -124,5 +136,4 @@ public class UserService {
 
         return null;
     }
-
 }

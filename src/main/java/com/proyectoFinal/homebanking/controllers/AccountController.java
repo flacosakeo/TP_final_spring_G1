@@ -41,22 +41,22 @@ public class AccountController {
     public ResponseEntity<?> createAccount(@RequestBody AccountDTO account){
         //return ResponseEntity.status(HttpStatus.CREATED).body(service.createAccount(account));
 
-        String cbu =account.getCbu(); // cbu a verificar
+        //String cbu =account.getCbu(); // cbu a verificar
         // Patrón para verificar que el cbu contenga exactamente 23 dígitos
-        String regex = "\\d{23}";
+        //String regex = "\\d{23}";
 
         // Compilar el patrón
-        Pattern pattern = Pattern.compile(regex);
+        //Pattern pattern = Pattern.compile(regex);
 
         // Crear un Matcher con el cbu
-        Matcher matcher = pattern.matcher(cbu);
+        //Matcher matcher = pattern.matcher(cbu);
 
         // Verificar si el cbu cumple con el patrón
-        if (matcher.matches()) {
+        //if (matcher.matches()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(service.createAccount(account));
-        } else {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("El CBU no es valido "+cbu+" debe contener 23 caracteres numericos");
-        }
+        //} else {
+        //    return ResponseEntity.status(HttpStatus.CONFLICT).body("El CBU no es valido "+cbu+" debe contener 23 caracteres numericos");
+        //}
     }
     
     //@PutMapping(value="/{id}")
