@@ -1,4 +1,4 @@
-package com.proyectoFinal.homebanking.tools.validations;
+package com.proyectoFinal.homebanking.tools.validations.serviceValidations;
 
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.repositories.UserRepository;

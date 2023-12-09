@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 
 public class ControllerValidation {
 
+    // region ------------------  GENERAL VALIDATIONS  ------------------
     /**
      * @author Florencia
      * Método genérico que verifica que el número pasado por párametro sea positivo.
@@ -21,7 +22,9 @@ public class ControllerValidation {
             throw new IllegalArgumentException("Tipo de número no compatible. Se esperaba Double, Float, Integer o Long.");
         }
     }
+    // endregion
 
+    // region ------------------  USER CONTROLLER VALIDATIONS  ------------------
     // Valida que el dni tenga 8 digitos
     public static Boolean dniNumberDigitsIsValid(String dni) {
         // DNI a verificar viene por el parametro. Si no se pasa tal atributo, no se analiza mas nada.
@@ -78,4 +81,15 @@ public class ControllerValidation {
 
         return matcher.matches();
     }
+
+    public static String validateTransferAccountId(Long originAccount, Long targetAccount){
+        if(!ControllerValidation.isPositive(originAccount) && (!ControllerValidation.isPositive(targetAccount))){
+            return "Cuenta destino y cuenta de origen invalidas.";
+        }else if(!ControllerValidation.isPositive(originAccount)){
+            return "Ingrese una cuenta de origen valida";
+        }else{
+            return "Ingrese una cuenta de destino valida";
+        }
+    }
+    // endregion
 }

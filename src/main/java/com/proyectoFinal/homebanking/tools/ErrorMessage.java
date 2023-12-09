@@ -6,26 +6,7 @@ public class ErrorMessage {
 
     // region ------------------  TRANSFERS ERROR MESSAGES  ------------------
     // region  ------------  CONTROLLER  ------------
-    public static String dniNotFound(String dni) {
-        return "¡El DNI '" + dni + "' no es valido! ¡Debe contener 8 caracteres numericos!";
-    }
 
-    public static String invalidEmail(String email) {
-        return "¡El EMAIL ingresado '" + email + "' no es valido! ¡Intente nuevamente!";
-    }
-
-    public static String invalidPassword() {
-        return "¡Contraseña incorrecta! Debe contener al menos 8 caracteres";
-    }
-
-    public static String invalidName() {
-        return "¡Nombre invalido! Debe comenzar en mayúscula y tener al menos 2 letras. " +
-                "Acepta nombres compuestos (hasta 3 palabras)";
-    }
-
-    public static String usernameInvalid() {
-        return "¡Username invalido! Debe tener entre 4 y 8 caracteres. Solo se admiten letras o números";
-    }
     // endregion
 
     // region  ------------  SERVICE  ------------
@@ -56,6 +37,10 @@ public class ErrorMessage {
     // endregion
 
     // region  ------------  SERVICE  ------------
+    public static String accountNotFound(Long id) {
+        return "¡La cuenta con ID '" + id + "' NO fue encontrada!";
+    }
+
     public static String originAccountNotFound(Long id) {
         return "Cuenta origen no existe, ID: '" + id + "'";
     }
@@ -72,13 +57,63 @@ public class ErrorMessage {
         return "Ambas cuentas son iguales: '" + idOriginAccount + "', '" + idTargetAccount + "'";
     }
 
-    public static String accountNotFound(Long id) {
-        return "¡La cuenta con ID '" + id + "' NO fue encontrada!";
-    }
     // endregion
     // endregion
 
     // region ------------------  USERS ERROR MESSAGES  ------------------
+    // region  ------------  CONTROLLER  ------------
+    public static String dniNotFound(String dni) {
+        return "¡El DNI '" + dni + "' no es valido! ¡Debe contener 8 caracteres numericos!";
+    }
 
+    public static String invalidEmail(String email) {
+        return "¡El EMAIL ingresado '" + email + "' no es valido! ¡Intente nuevamente!";
+    }
+
+    public static String invalidPassword() {
+        return "¡Contraseña incorrecta! Debe contener al menos 8 caracteres";
+    }
+
+    public static String invalidName() {
+        return "¡Nombre invalido! Debe comenzar en mayúscula y tener al menos 2 letras. " +
+                "Acepta nombres compuestos (hasta 3 palabras)";
+    }
+
+    public static String usernameInvalid() {
+        return "¡Username invalido! Debe tener entre 4 y 8 caracteres. Solo se admiten letras o números";
+    }
+    // endregion
+
+    // region  ------------  SERVICE  ------------
+    public static String userNotFound(Long id) {
+        return "¡El usuario con ID '" + id + "' NO fue encontrado!";
+    }
+
+    public static String userEmailAttributeExists(String email) {
+        return "¡Email " + email + " ya registrado!";
+    }
+
+    public static String userDniExists(String dni) {
+        return "¡Ya existe un usuario con el DNI: " + dni + "!";
+    }
+
+    public static String userUsernameExists(String email) {
+        return "¡Ya existe un usuario con el USERNAME " + email + "!";
+    }
+
+    public static String userDeleted() {
+        return "¡El usuario fue eiminado existosamente!";
+    }
+
+    public static String userNotFoundAndNullAttributes(Long id) {
+        return "El usuario con id '" + id + "' NO fue encontrado! Y uno o varios atributos son nulos";
+    }
+
+    public static String userNullAttributes() {
+        return "¡Uno o varios de los atributos enviados son nulos!";
+    }
+
+
+    // endregion
     // endregion
 }

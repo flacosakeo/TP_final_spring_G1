@@ -11,7 +11,8 @@ import com.proyectoFinal.homebanking.repositories.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.proyectoFinal.homebanking.tools.validations.UserValidation;
+import com.proyectoFinal.homebanking.tools.ErrorMessage;
+import com.proyectoFinal.homebanking.tools.validations.serviceValidations.UserValidation;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -31,13 +32,13 @@ public class UserService {
     
     public UserDTO createUser(UserDTO dto){
         if(UserValidation.existUserByEmail(dto.getEmail()) )
-            throw new EntityAttributeExistsException("¡Email " + dto.getEmail() + " ya registrado!");
+            throw new EntityAttributeExistsException( ErrorMessage.userEmailAttributeExists(dto.getEmail()));
 
         if( UserValidation.existUserByDni(dto.getDni()) )
-            throw new EntityAttributeExistsException("¡Ya existe un usuario con el DNI: " + dto.getDni() + "!");
+            throw new EntityAttributeExistsException( ErrorMessage.userDniExists(dto.getDni()) );
 
         if( UserValidation.existUserByUsername(dto.getUsername()) )
-            throw new EntityAttributeExistsException("¡Ya existe un usuario con el USERNAME " + dto.getUsername() + "!");
+            throw new EntityAttributeExistsException( ErrorMessage.userUsernameExists(dto.getDni()) );
 
         // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
         User userSaved = repository.save(UserMapper.dtoToUser(dto));
@@ -46,24 +47,24 @@ public class UserService {
     
     public UserDTO getUserById(Long id){
         User entity = repository.findById(id).orElseThrow( () ->
-                new EntityNotFoundException("¡El usuario con ID '" + id + "' NO fue encontrado!"));
+                new EntityNotFoundException( ErrorMessage.userNotFound(id)) );
         return UserMapper.userToDto(entity);
     }
 
     public String deleteUser(Long id){
         if (repository.existsById(id)){
             repository.deleteById(id);
-            return "Eliminado";
+            return ErrorMessage.userDeleted();
         }else{
-            //throw new  UserNotExistsException("Usuario no existe");
-            return "Usuario no existe";
+            //TODO: retornar una excepcion(? Extrapolacion para todas las demas entidades...
+            return ErrorMessage.userNotFound(id);
         }
     }
     
     public UserDTO updateUser(Long id, UserDTO dto){
         if(repository.existsById(id)){
             User userToModify = repository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException("¡El usuario con ID '" + id + "' NO fue encontrado!"));
+                    new EntityNotFoundException( ErrorMessage.userNotFound(id)) );
 
             // LÓGICA DEL PATCH
             if(dto.getName() != null)
@@ -84,17 +85,20 @@ public class UserService {
             User userModified = repository.save(userToModify);
             return UserMapper.userToDto(userModified);
         }
-        throw new EntityNotFoundException("¡El usuario con ID '" + id + "' no fue encontrado!");
+        throw new EntityNotFoundException( ErrorMessage.userNotFound(id) );
     }
 
     public UserDTO updateAllUser(Long id, UserDTO dto) {
         // Primero verifico si existe un usuario con ese id en la BD
         // Y tambien se valida que todos los datos del "dto" no vienen en null
+        //TODO: refactor.. bajar esta logica del if debajo de todas las validaciones y
+        // eliminar el IF, ya que parece que es innecesario al hacer tal cambio.
+        // y se eliminaria el return null tambien.
         if(repository.existsById(id) && UserValidation.validateUserDtoAttributes(dto)) {
 
             // Consigo el usuario a modificar desde la BD
             User userToModify = repository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException("¡El usuario con ID '" + id + "' NO fue encontrado!"));
+                    new EntityNotFoundException( ErrorMessage.userNotFound(id) ));
 
             // LÓGICA DEL PUT
             userToModify.setEmail(dto.getEmail());
@@ -110,14 +114,13 @@ public class UserService {
         }
 
         if(!repository.existsById(id) && !UserValidation.validateUserDtoAttributes(dto))
-            throw new FatalErrorException("El usuario con id '" + id +
-                    "' NO fue encontrado! Y uno o varios atributos son nulos");
+            throw new FatalErrorException(ErrorMessage.userNotFoundAndNullAttributes(id));
 
         if(!repository.existsById(id))
-            throw new EntityNotFoundException("¡El usuario con id '" + id + "' NO fue encontrado!");
+            throw new EntityNotFoundException( ErrorMessage.userNotFound(id) );
 
         if(!UserValidation.validateUserDtoAttributes(dto))
-            throw new EntityNullAttributesException("¡Uno o varios de los atributos enviados son nulos!");
+            throw new EntityNullAttributesException( ErrorMessage.userNullAttributes());
 
         return null;
     }

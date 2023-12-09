@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.proyectoFinal.homebanking.tools.ErrorMessage;
 import com.proyectoFinal.homebanking.tools.validations.ControllerValidation;
-import com.proyectoFinal.homebanking.tools.validations.TransferValidation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -56,7 +55,7 @@ public class TransferController {
 
         if(!ControllerValidation.isPositive(originAccountId) || (!ControllerValidation.isPositive(targetAccountId))){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(TransferValidation.validateTransferAccountId(originAccountId,
+                .body(ControllerValidation.validateTransferAccountId(originAccountId,
                         targetAccountId));
         }
 
