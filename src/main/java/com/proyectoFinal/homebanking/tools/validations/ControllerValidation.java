@@ -6,8 +6,8 @@ import java.util.regex.Pattern;
 
 public class ControllerValidation {
 
-
     /**
+     * @author Florencia
      * Método genérico que verifica que el número pasado por párametro sea positivo.
      * @param number de tipo <N>. El parametro number acepta objetos que hereden de la clase Number
      * @return boolean. Retorna True si el número es positivo.
