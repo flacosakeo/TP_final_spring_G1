@@ -13,7 +13,7 @@ import lombok.*;
 public class TransferDTO {
     private Long id;
     private BigDecimal amount;
-    private Long originAccount;
-    private Long targetAccount;
+    private Long originAccountId;
+    private Long targetAccountId;
     private LocalDateTime dateTime;
 }

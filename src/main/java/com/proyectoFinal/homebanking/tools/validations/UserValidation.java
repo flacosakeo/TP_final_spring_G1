@@ -5,11 +5,11 @@ import com.proyectoFinal.homebanking.repositories.UserRepository;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserValidations {
+public class UserValidation {
     public static UserRepository repository;
 
-    public UserValidations(UserRepository repository) {
-        this.repository = repository;
+    public UserValidation(UserRepository repository) {
+        UserValidation.repository = repository;
     }
 
     // Valida que existan usuarios unicos por mail

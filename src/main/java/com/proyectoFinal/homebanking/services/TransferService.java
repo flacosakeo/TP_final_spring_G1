@@ -24,12 +24,12 @@ public class TransferService {
     private final TransferRepository transferRepository;
     private final AccountRepository accountRepository;
     
-    public TransferService(TransferRepository transferRepository, AccountRepository accountRepository){
+    public TransferService(TransferRepository transferRepository, AccountRepository accountRepository) {
         this.transferRepository = transferRepository;
         this.accountRepository = accountRepository;
     }
 
-    public List<TransferDTO> getTransfers(){
+    public List<TransferDTO> getTransfers() {
         List<Transfer> transfers = transferRepository.findAll();
 
         return transfers.stream()
@@ -37,60 +37,58 @@ public class TransferService {
                 .collect(Collectors.toList());
     }
     
-    public TransferDTO getTransferById(Long id){
+    public TransferDTO getTransferById(Long id) {
         Transfer transfer = transferRepository.findById(id).orElseThrow(() ->
             new EntityNotFoundException(ErrorMessage.transferNotFound(id)));
 
         return TransferMapper.transferToDto(transfer);
     }
     
-    public String deleteTransfer(Long id){
-        if (transferRepository.existsById(id)){
+    public String deleteTransfer(Long id) {
+        if (transferRepository.existsById(id)) {
             transferRepository.deleteById(id);
             return ErrorMessage.transferSuccessfullyDeleted(id);
-        }else{
+        } else {
             throw new EntityNotFoundException(ErrorMessage.transferNotFound(id));
         }
     }
 
     @Transactional
-    public TransferDTO createTransfer(TransferDTO dto){
+    public TransferDTO createTransfer(TransferDTO dto) {
+
+        Long originAccountId = dto.getOriginAccountId();
+        Long targetAccountId = dto.getTargetAccountId();
 
         //verifica si ambas cuentas son iguales
-        if(Objects.equals(dto.getOriginAccount(), dto.getTargetAccount())){
-            throw new AccountsAreTheSameException("Ambas cuentas son iguales: " + dto.getOriginAccount() +
-                    ", " + dto.getTargetAccount());
+        if(Objects.equals(originAccountId, targetAccountId)) {
+            throw new AccountsAreTheSameException(ErrorMessage.equalAccounts(originAccountId, targetAccountId));
         }
 
         //verificar que las cuentas origen y destino existan
-        Account originAccount = accountRepository.findById( dto.getOriginAccount() )
+        Account originAccount = accountRepository.findById( originAccountId )
                              .orElseThrow( () -> new EntityNotFoundException( ErrorMessage.originAccountNotFound(
-                                     dto.getOriginAccount() )));
+                                     originAccountId )));
 
-        Account destinationAccount = accountRepository.findById(dto.getTargetAccount())
+        Account destinationAccount = accountRepository.findById( targetAccountId )
                              .orElseThrow(() -> new EntityNotFoundException(ErrorMessage.destinationAccountNotFound(
-                                     dto.getTargetAccount() )));
+                                     targetAccountId )));
         
-        //verifica si la cuenta origen tiene fondos
-        if (originAccount.getMonto().compareTo(dto.getAmount()) < 0){
-            throw new InsufficientFoundsException( ErrorMessage.insufficientFounds(dto.getOriginAccount()));
+        // Verifica si la cuenta origen tiene fondos
+        if (originAccount.getMonto().compareTo(dto.getAmount()) < 0) {
+            throw new InsufficientFoundsException( ErrorMessage.insufficientFounds( originAccountId ));
         }
         
-        //se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
-        originAccount.setMonto(originAccount.getMonto().subtract(dto.getAmount()));
-        destinationAccount.setMonto(destinationAccount.getMonto().add(dto.getAmount()));
+        // Se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
+        originAccount.setMonto( originAccount.getMonto().subtract(dto.getAmount()) );
+        destinationAccount.setMonto( destinationAccount.getMonto().add( dto.getAmount()) );
         
-        //guarda las cuentas actualizadas
+        // Guarda las cuentas actualizadas
         accountRepository.save(originAccount);
         accountRepository.save(destinationAccount);
         
-        //crea la transferencia y la guarda en base de datos
-        Transfer transfer = Transfer.builder()
-                .amount(dto.getAmount())
-                .originAccount(dto.getOriginAccount())
-                .targetAccount(dto.getTargetAccount())
-                .dateTime(LocalDateTime.now())
-                .build();
+        // Crea la transferencia y la guarda en base de datos
+        dto.setDateTime( LocalDateTime.now() );
+        Transfer transfer = TransferMapper.dtoToTransfer(dto);
 
         transfer = transferRepository.save(transfer);
         return TransferMapper.transferToDto(transfer);
@@ -101,19 +99,23 @@ public class TransferService {
     // Si hace falta realizar una modificacion, por ejemplo si se transfirio erroneamente, deberia realizarse otra
     // transferencia con el mismo monto y id de las cuentas de origen y destino de forma invertida.
     // TODO (#Ref. 2): agregar atributo en entidad TRANSFER que indique quien realiza o el estado de la transferencia.
-    public TransferDTO updateTransfer(Long id, TransferDTO dto){
-        if(transferRepository.existsById(id)){
+    public TransferDTO updateTransfer(Long id, TransferDTO dto) {
+        if(transferRepository.existsById(id)) {
+            Long originAccountId = dto.getOriginAccountId();
+            Long targetAccountId = dto.getTargetAccountId();
+
             Transfer transferToModify = transferRepository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException("¡La transferencia con ID '" + id + "' NO fue encontrado!"));
+                    new EntityNotFoundException( ErrorMessage.transferNotFound(id) ));
+
             // LÓGICA DEL PATCH
             if(dto.getAmount() != null)
                 transferToModify.setAmount(dto.getAmount());
 
-            if(dto.getOriginAccount() != null)
-                transferToModify.setOriginAccount(dto.getOriginAccount());
+            if(originAccountId != null)
+                transferToModify.setOriginAccountId(originAccountId);
 
-            if (dto.getTargetAccount() != null)
-                transferToModify.setTargetAccount(dto.getTargetAccount());
+            if (targetAccountId != null)
+                transferToModify.setTargetAccountId(targetAccountId);
 
             if (dto.getDateTime() != null)
                 transferToModify.setDateTime(dto.getDateTime());

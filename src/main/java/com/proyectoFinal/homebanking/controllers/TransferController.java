@@ -4,7 +4,9 @@ import com.proyectoFinal.homebanking.models.DTO.TransferDTO;
 import com.proyectoFinal.homebanking.services.TransferService;
 import java.util.List;
 
-import com.proyectoFinal.homebanking.tools.Validations;
+import com.proyectoFinal.homebanking.tools.ErrorMessage;
+import com.proyectoFinal.homebanking.tools.validations.ControllerValidation;
+import com.proyectoFinal.homebanking.tools.validations.TransferValidation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/transfer")
+@RequestMapping("/api/transfers")
 public class TransferController {
     private final TransferService service;
     
@@ -33,29 +35,29 @@ public class TransferController {
     }
     
     @GetMapping(value="/{id}")
-    public ResponseEntity<TransferDTO> getTransferById(@PathVariable Long id){//el pathvariable guarda el id de la request
-                                                   //en la variable id de la funcion
+    public ResponseEntity<TransferDTO> getTransferById(@PathVariable Long id){ //Pathvariable guarda el id de la request
+                                                                               //en la variable id de la funcion
         return ResponseEntity.status(HttpStatus.OK).body(service.getTransferById(id));
     }
 
     @PostMapping()
     public ResponseEntity<?> createTransfer(@RequestBody TransferDTO transfer){
 
-        Long originAccount = transfer.getOriginAccount();
-        Long targetAccount = transfer.getTargetAccount();
+        Long originAccountId = transfer.getOriginAccountId();
+        Long targetAccountId = transfer.getTargetAccountId();
 
-        if(originAccount == null || targetAccount == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La cuenta de origen o la cuenta de destino es requerida.");
+        if(originAccountId == null || targetAccountId == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorMessage.requiredAccount());
         }
 
         if (transfer.getAmount() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monto es requerido.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorMessage.requiredAmount());
         }
 
-        if(!Validations.isPositive(originAccount) || (!Validations.isPositive(targetAccount))){
+        if(!ControllerValidation.isPositive(originAccountId) || (!ControllerValidation.isPositive(targetAccountId))){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Validations.validateTransferAccountId(originAccount,
-                        targetAccount));
+                .body(TransferValidation.validateTransferAccountId(originAccountId,
+                        targetAccountId));
         }
 
         // region Validar si amount es un número
@@ -75,15 +77,12 @@ public class TransferController {
 //        }
         // endregion
 
-        if(!Validations.isPositive(transfer.getAmount())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monto invalido: $" + transfer.getAmount()
-                    + ", Debe ingresar un monto mayor a $0.");
+        if(!ControllerValidation.isPositive(transfer.getAmount())){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ErrorMessage.invalidAmount(transfer.getAmount()) );
         }
 
-    return ResponseEntity.status(HttpStatus.CREATED).body(service.createTransfer(transfer));
-
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createTransfer(transfer));
     }
-
 
     @PutMapping(value="/{id}")
     public ResponseEntity<TransferDTO> updateTransfer(@PathVariable Long id, @RequestBody TransferDTO transfer){
