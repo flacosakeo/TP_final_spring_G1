@@ -23,16 +23,5 @@ public class ErrorMessage {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+    public static String accountNotFound(Long id) { return "¡La cuenta con ID '" + id + "' NO fue encontrada!";}
 }
