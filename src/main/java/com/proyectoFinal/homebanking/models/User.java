@@ -43,5 +43,5 @@ public class User {
     private String dni;
 
     @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Account> accounts=new ArrayList<>();
+    private List<Account> accounts;
 }

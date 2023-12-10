@@ -8,21 +8,21 @@ import lombok.experimental.UtilityClass;
 public class AccountMapper {
     public static Account dtoToAccount(AccountDTO dto){
         return Account.builder()
-                .tipo(dto.getTipo())
-                .dueño(dto.getDueño())
+                .accountType(dto.getAccountType())
+                .ownerId(dto.getOwnerId())
                 .cbu(dto.getCbu())
                 .alias(dto.getAlias())
-                .monto(dto.getMonto())
+                .amount(dto.getAmount())
                 .build();
     }
     public static AccountDTO accountToDto(Account account){
         return AccountDTO.builder()
-                .id(account.getId_account())
-                .tipo(account.getTipo())
-                .dueño(account.getDueño())
+                .id(account.getId())
+                .accountType(account.getAccountType())
+                .ownerId(account.getOwnerId())
                 .cbu(account.getCbu())
                 .alias(account.getAlias())
-                .monto(account.getMonto())
+                .amount(account.getAmount())
                 .build();
     }
 }

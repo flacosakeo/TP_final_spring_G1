@@ -49,9 +49,9 @@ public class UserService {
         User userSaved = repository.save(UserMapper.dtoToUser(dto));
 
         AccountDTO accountDTO1 = new AccountDTO();
-        accountDTO1.setTipo(AccountType.SAVINGS_BANK);
+        accountDTO1.setAccountType(AccountType.SAVINGS_BANK);
         //accountDTO1.setUser_id(userDTO.getId());
-        accountDTO1.setDueño(dto.getName());
+        accountDTO1.setOwnerId(dto.getId());
         servicioCuenta.createAccount( accountDTO1);
 
         return UserMapper.userToDto(userSaved);

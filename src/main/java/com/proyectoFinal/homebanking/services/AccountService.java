@@ -37,7 +37,7 @@ public class AccountService {
         }*/
         accountDTO.setAlias(AccountAlias.values()[new Random().nextInt(AccountAlias.values().length)]);
         //accountDTO.setTipo (AccountType.values()[new Random().nextInt(AccountType.values().length)]);
-        accountDTO.setMonto(BigDecimal.ZERO);
+        accountDTO.setAmount(BigDecimal.ZERO);
         accountDTO.setCbu(AccountValidation.generateValidCbu());
 
         Account account = repository.save(AccountMapper.dtoToAccount(accountDTO));
@@ -65,11 +65,11 @@ public class AccountService {
         if(repository.existsById(id)){
             Account accountToModify=repository.findById(id).get();
             //logica del patch
-            if (dto.getTipo()!=null){
+            if (dto.getAccountType()!=null){
                 //accountToModify.setTipo(dto.getTipo());
             }
-            if (dto.getDueño()!=null){
-                accountToModify.setDueño(dto.getDueño());
+            if (dto.getOwnerId()!=null){
+                accountToModify.setOwnerId(dto.getOwnerId());
             }
             if (dto.getCbu()!=null){
                 //accountToModify.setCbu(dto.getCbu());
@@ -77,8 +77,8 @@ public class AccountService {
             if (dto.getAlias()!=null){
                 accountToModify.setAlias(dto.getAlias());
             }
-            if (dto.getMonto()!=null){
-                accountToModify.setMonto(dto.getMonto());
+            if (dto.getAmount()!=null){
+                accountToModify.setAmount(dto.getAmount());
             }
             repository.save(accountToModify);
             return AccountMapper.accountToDto(accountToModify);
@@ -103,7 +103,7 @@ public class AccountService {
 //                amount = BigDecimal.ZERO;
 //            }
 
-            accountToModify.setMonto(accountToModify.getMonto().add(amount));
+            accountToModify.setAmount(accountToModify.getAmount().add(amount));
 
             Account accountModified = repository.save(accountToModify);
             return AccountMapper.accountToDto(accountModified);
@@ -117,12 +117,12 @@ public class AccountService {
                     new EntityNotFoundException(ErrorMessage.accountNotFound(id)));
 
             //verifica si la cuenta origen tiene fondos
-            if (accountToModify.getMonto().compareTo(amount) < 0){
-                throw new InsufficientFoundsException( ErrorMessage.insufficientFounds(accountToModify.getId_account()));
+            if (accountToModify.getAmount().compareTo(amount) < 0){
+                throw new InsufficientFoundsException( ErrorMessage.insufficientFounds(accountToModify.getId()));
             }
 
             //se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
-            accountToModify.setMonto(accountToModify.getMonto().subtract(amount));
+            accountToModify.setAmount(accountToModify.getAmount().subtract(amount));
 
             Account accountModified = repository.save(accountToModify);
             return AccountMapper.accountToDto(accountModified);

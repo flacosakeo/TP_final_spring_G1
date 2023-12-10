@@ -25,14 +25,14 @@ import lombok.*;
 public class Account {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="id_cuenta")
-    private Long id_account;
+    @Column(name="id")
+    private Long id;
     
-    @Column(name="tipo_de_cuenta")
-    private AccountType tipo;
+    @Column(name="account_type")
+    private AccountType accountType;
     
-    @Column(name="dueño")
-    private String dueño;
+    @Column(name="id_owner")
+    private Long ownerId;
     
     @Column(name="CBU")
 
@@ -41,10 +41,10 @@ public class Account {
     @Column(name="alias")
     private AccountAlias alias;
     
-    @Column(name="importe")
-    private BigDecimal monto;
+    @Column(name="amount")
+    private BigDecimal amount;
     
     @ManyToOne
-    @JoinColumn(name = "user_id")    
-    private User id; 
+    @JoinColumn(name = "user_id")
+    private User idUser;
 }
