@@ -17,7 +17,7 @@ public class AccountDTO {
     private AccountType accountType;
     private Long ownerId;
     private String cbu;
-    private AccountAlias alias;
+    private String alias;
     private BigDecimal amount;
     //private Long user_id;
 }

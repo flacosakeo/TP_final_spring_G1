@@ -39,12 +39,12 @@ public class Account {
     private String cbu;
     
     @Column(name="alias")
-    private AccountAlias alias;
+    private String alias;
     
     @Column(name="amount")
     private BigDecimal amount;
     
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User idUser;
+    @JoinColumn(name = "owner")
+    private User owner;
 }

@@ -1,13 +1,15 @@
 package com.proyectoFinal.homebanking.testsprueba;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.List;
 
 public class Prueba {
     public static void main(String[] args) {
         System.out.println("Hello world!");
 
     }
-    public void testIsPositive(){
+    public static void testIsPositive(){
         Double doubleType = 1.3;
         Integer integerType = -7;
         Float floatType = -17.3F;
