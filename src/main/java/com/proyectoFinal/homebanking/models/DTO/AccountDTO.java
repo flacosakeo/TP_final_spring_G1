@@ -14,10 +14,10 @@ import lombok.*;
 @Builder
 public class AccountDTO {
     private Long id;
-    private AccountType tipo;
-    private String dueño;
+    private AccountType accountType;
+    private Long ownerId;
     private String cbu;
-    private AccountAlias alias;
-    private BigDecimal monto;
+    private String alias;
+    private BigDecimal amount;
     //private Long user_id;
 }

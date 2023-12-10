@@ -74,13 +74,13 @@ public class TransferService {
                                      targetAccountId )));
         
         // Verifica si la cuenta origen tiene fondos
-        if (originAccount.getMonto().compareTo(dto.getAmount()) < 0) {
+        if (originAccount.getAmount().compareTo(dto.getAmount()) < 0) {
             throw new InsufficientFoundsException( NotificationMessage.insufficientFounds( originAccountId ));
         }
         
         // Se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
-        originAccount.setMonto( originAccount.getMonto().subtract(dto.getAmount()) );
-        destinationAccount.setMonto( destinationAccount.getMonto().add( dto.getAmount()) );
+        originAccount.setAmount( originAccount.getAmount().subtract(dto.getAmount()) );
+        destinationAccount.setAmount( destinationAccount.getAmount().add( dto.getAmount()) );
         
         // Guarda las cuentas actualizadas
         accountRepository.save(originAccount);

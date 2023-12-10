@@ -6,16 +6,18 @@ import com.proyectoFinal.homebanking.exceptions.InsufficientFoundsException;
 import com.proyectoFinal.homebanking.mappers.AccountMapper;
 import com.proyectoFinal.homebanking.models.Account;
 import com.proyectoFinal.homebanking.models.DTO.AccountDTO;
-import com.proyectoFinal.homebanking.models.Enum.AccountAlias;
+import com.proyectoFinal.homebanking.models.Enum.AccountType;
 import com.proyectoFinal.homebanking.repositories.AccountRepository;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
+import com.proyectoFinal.homebanking.tools.validations.serviceValidations.AccountValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static com.proyectoFinal.homebanking.tools.validations.serviceValidations.AccountValidation.generateValidAlias;
 
 @Service
 public class AccountService {
@@ -33,17 +35,16 @@ public class AccountService {
         /*for(int i=1; i<4; i++){
             List<AccountAlias> alias = AccountAlias.values()[new Random().nextInt(AccountAlias.values().length)];
         }*/
-        accountDTO.setAlias(AccountAlias.values()[new Random().nextInt(AccountAlias.values().length)]);
-        //accountDTO.setTipo (AccountType.values()[new Random().nextInt(AccountType.values().length)]);
-        accountDTO.setMonto(BigDecimal.ZERO);
-        accountDTO.setCbu(generadorCbu());
-        Account cbuValidate = repository.findByCbu(accountDTO.getCbu());
-        if (cbuValidate==null){
-            Account account = repository.save(AccountMapper.dtoToAccount(accountDTO));
-            return AccountMapper.accountToDto(account);
-        }else{
-            return "Cbu ya existe";
+        accountDTO.setAlias(AccountValidation.generateValidAlias());
+        if(accountDTO.getAccountType() == null){
+            accountDTO.setAccountType(AccountType.SAVINGS_BANK);
         }
+        accountDTO.setAmount(BigDecimal.ZERO);
+        accountDTO.setCbu(AccountValidation.generateValidCbu());
+
+        Account account = repository.save(AccountMapper.dtoToAccount(accountDTO));
+        return AccountMapper.accountToDto(account);
+
     }
     
     public AccountDTO getAccountById(Long id){
@@ -64,30 +65,31 @@ public class AccountService {
     public Object updateAccount(Long id, AccountDTO dto){
     //Account cbuValidate = repository.findByCbu(dto.getCbu());
     //if(cbuValidate==null){
+        //Solo se va a poder modificar el ALIAS de account
         if(repository.existsById(id)){
-            Account accountToModify=repository.findById(id).orElseThrow(() ->
+            Account accountToModify = repository.findById(id).orElseThrow(() ->
                     new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
 
             // LÓGICA DEL PATCH
-            //if (dto.getTipo() != null)
-                //accountToModify.setTipo(dto.getTipo());
+//            if (dto.getAccountType()!=null)
+//                accountToModify.setTipo(dto.getTipo());
 
-            //if (dto.getCbu() != null)
-                //accountToModify.setCbu(dto.getCbu());
+//            if (dto.getOwnerId()!=null)
+//                accountToModify.setOwnerId(dto.getOwnerId());
+
+//            if (dto.getCbu()!=null)
+//                accountToModify.setCbu(dto.getCbu());
 
             if (dto.getAlias() != null)
                 accountToModify.setAlias(dto.getAlias());
 
-            if (dto.getMonto() != null)
-                accountToModify.setMonto(dto.getMonto());
+//            if (dto.getAmount()!=null)
+//                accountToModify.setAmount(dto.getAmount());
 
             repository.save(accountToModify);
             return AccountMapper.accountToDto(accountToModify);
         }
 
-    //}else{
-    //    return "Cbu ya existe";
-    //}
         return null;
     }
 
@@ -96,15 +98,7 @@ public class AccountService {
             Account accountToModify = repository.findById(id).orElseThrow( () ->
                     new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
 
-            //TODO: dejo estos comentarios para luego realizar las validaciones
-//            if (accountToModify.getMonto() == null) {
-//                accountToModify.setMonto(BigDecimal.ZERO);
-//            }
-//            if(amount == null){
-//                amount = BigDecimal.ZERO;
-//            }
-
-            accountToModify.setMonto(accountToModify.getMonto().add(amount));
+            accountToModify.setAmount(accountToModify.getAmount().add(amount));
 
             Account accountModified = repository.save(accountToModify);
             return AccountMapper.accountToDto(accountModified);
@@ -118,12 +112,13 @@ public class AccountService {
                     new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
 
             //verifica si la cuenta origen tiene fondos
-            if (accountToModify.getMonto().compareTo(amount) < 0) {
-                throw new InsufficientFoundsException( NotificationMessage.insufficientFounds(accountToModify.getId_account()));
+
+            if (accountToModify.getAmount().compareTo(amount) < 0){
+                throw new InsufficientFoundsException( NotificationMessage.insufficientFounds(accountToModify.getId()));
             }
 
             //se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
-            accountToModify.setMonto(accountToModify.getMonto().subtract(amount));
+            accountToModify.setAmount(accountToModify.getAmount().subtract(amount));
 
             Account accountModified = repository.save(accountToModify);
             return AccountMapper.accountToDto(accountModified);
@@ -131,17 +126,4 @@ public class AccountService {
         throw new EntityNotFoundException(NotificationMessage.accountNotFound(id));
     }
 
-    private String generadorCbu(){
-        int i=1;
-        String cadena="";
-        while (i<24){
-            int randomNum = (int)(Math.random() * 10);
-            //cbu.add(randomNum);
-            cadena += String.valueOf(randomNum);
-            //String cbuCadena=cadena;
-            i++;
-            //System.out.print(cbuCadena);
-        }
-        return cadena;
-    }
 }

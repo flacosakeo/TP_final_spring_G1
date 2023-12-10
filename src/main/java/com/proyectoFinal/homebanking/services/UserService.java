@@ -49,9 +49,10 @@ public class UserService {
         // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
         User userSaved = repository.save(UserMapper.dtoToUser(dto));
 
+
         AccountDTO accountDto = new AccountDTO();
-        accountDto.setTipo(AccountType.CAJA_DE_AHORRO);
-        //accountDTO1.setUser_id(userDTO.getId());
+        accountDto.setAccountType(AccountType.SAVINGS_BANK);
+        accountDto.setOwnerId(userSaved.getId());
         servicioCuenta.createAccount(accountDto);
 
         return UserMapper.userToDto(userSaved);

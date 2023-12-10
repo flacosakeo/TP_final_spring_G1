@@ -39,24 +39,11 @@ public class AccountController {
     
     @PostMapping()
     public ResponseEntity<?> createAccount(@RequestBody AccountDTO account){
-        //return ResponseEntity.status(HttpStatus.CREATED).body(service.createAccount(account));
+        if(account.getOwnerId() == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("id user es requerido");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createAccount(account));
 
-        //String cbu =account.getCbu(); // cbu a verificar
-        // Patrón para verificar que el cbu contenga exactamente 23 dígitos
-        //String regex = "\\d{23}";
-
-        // Compilar el patrón
-        //Pattern pattern = Pattern.compile(regex);
-
-        // Crear un Matcher con el cbu
-        //Matcher matcher = pattern.matcher(cbu);
-
-        // Verificar si el cbu cumple con el patrón
-        //if (matcher.matches()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(service.createAccount(account));
-        //} else {
-        //    return ResponseEntity.status(HttpStatus.CONFLICT).body("El CBU no es valido "+cbu+" debe contener 23 caracteres numericos");
-        //}
     }
     
     //@PutMapping(value="/{id}")
@@ -64,23 +51,11 @@ public class AccountController {
     
     @PutMapping(value="/{id}")
     public ResponseEntity<?> updateAccount(@PathVariable Long id, @RequestBody AccountDTO account){
-        //return ResponseEntity.status(HttpStatus.OK).body(service.updateAccount(id, account));
-        //String cbu =account.getCbu(); // cbu a verificar
-        // Patrón para verificar que el cbu contenga exactamente 23 dígitos
-        //String regex = "\\d{23}";
+        if(account.getAlias() == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Alias es requerido");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.updateAccount(id, account));
 
-        // Compilar el patrón
-        //Pattern pattern = Pattern.compile(regex);
-
-        // Crear un Matcher con el cbu
-        //Matcher matcher = pattern.matcher(cbu);
-
-        // Verificar si el cbu cumple con el patrón
-        //if (matcher.matches()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(service.updateAccount(id, account));
-        //} else {
-            //return ResponseEntity.status(HttpStatus.CONFLICT).body("El CBU no es valido "+cbu+" debe contener 23 caracteres numericos");
-        //}
     }
     
     @DeleteMapping(value="/{id}")
@@ -89,14 +64,20 @@ public class AccountController {
     }
 
     @PatchMapping(value="/{id}/deposit")
-    public ResponseEntity<AccountDTO> depositMoney(@PathVariable Long id, @RequestBody Map<String, BigDecimal> requestBody){
+    public ResponseEntity<?> depositMoney(@PathVariable Long id, @RequestBody Map<String, BigDecimal> requestBody){
         BigDecimal amount = requestBody.get("monto");
+        if(amount == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monto es requerido");
+        }
         return ResponseEntity.status(HttpStatus.OK).body(service.depositMoney(id, amount));
     }
 
     @PatchMapping(value="/{id}/extract")
-    public ResponseEntity<AccountDTO> extractMoney(@PathVariable Long id, @RequestBody Map<String, BigDecimal> requestBody){
+    public ResponseEntity<?> extractMoney(@PathVariable Long id, @RequestBody Map<String, BigDecimal> requestBody){
         BigDecimal amount = requestBody.get("monto");
+        if(amount == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monto es requerido");
+        }
         return ResponseEntity.status(HttpStatus.OK).body(service.extractMoney(id, amount));
     }
 }
