@@ -6,8 +6,27 @@ public class NotificationMessage {
 
     // region ------------------  TRANSFERS ERROR MESSAGES  ------------------
     // region  ------------  CONTROLLER  ------------
-    public static String requiredAccount() {
-        return "La cuenta de origen o la cuenta de destino es requerida.";
+    public static String requiredAccounts() {
+        return "Cuenta origen y cuenta de destino son requeridas";
+    }
+
+    public static String invalidAccounts() {
+        return "Cuenta origen y cuenta de destino invalidas";
+    }
+
+    public static String originAccountRequired() {
+        return "La cuenta de origen es requerida";
+    }
+
+    public static String invalidOriginAccount() {
+        return "Ingrese una cuenta de origen valida";
+    }
+    public static String targetAccountRequired() {
+        return "La cuenta de destino es requerida";
+    }
+
+    public static String invalidTargetAccount() {
+        return "Ingrese una cuenta de destino valida";
     }
 
     public static String requiredAmount() {

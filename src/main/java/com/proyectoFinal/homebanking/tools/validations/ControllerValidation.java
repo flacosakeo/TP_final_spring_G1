@@ -1,6 +1,9 @@
 package com.proyectoFinal.homebanking.tools.validations;
 
+import com.proyectoFinal.homebanking.exceptions.FatalErrorException;
 import com.proyectoFinal.homebanking.exceptions.InvalidAttributeException;
+import com.proyectoFinal.homebanking.exceptions.RequiredAttributeException;
+import com.proyectoFinal.homebanking.models.DTO.TransferDTO;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
 
@@ -47,7 +50,6 @@ public class ControllerValidation {
         if( !ControllerValidation.dniNumberDigitsIsValid(dto.getDni()) )
             throw new InvalidAttributeException( NotificationMessage.dniNotFound(dto.getDni()) );
     }
-
 
     // Valida que el dni tenga 8 digitos
     public static Boolean dniNumberDigitsIsValid(String dni) {
@@ -106,14 +108,75 @@ public class ControllerValidation {
         return matcher.matches();
     }
 
-    public static String validateTransferAccountId(Long originAccount, Long targetAccount){
-        if(!ControllerValidation.isPositive(originAccount) && (!ControllerValidation.isPositive(targetAccount))){
-            return "Cuenta destino y cuenta de origen invalidas.";
-        }else if(!ControllerValidation.isPositive(originAccount)){
-            return "Ingrese una cuenta de origen valida";
-        }else{
-            return "Ingrese una cuenta de destino valida";
+    // endregion
+
+    // region ------------------  TRANSFER CONTROLLER VALIDATIONS  ------------------
+    public static void validateTransferDto(TransferDTO dto) throws FatalErrorException, RequiredAttributeException,
+            InvalidAttributeException {
+
+        validateTransferAccountIds(dto.getOriginAccountId(), dto.getTargetAccountId() );
+        validateAmountTransfer(dto.getAmount());
+    }
+
+    public static void validateTransferAccountIds(Long originAccountId, Long targetAccountId)
+            throws FatalErrorException, RequiredAttributeException, InvalidAttributeException {
+
+        validateIfTransferAccountsIdsAreNull(originAccountId, targetAccountId);
+        validateIfTransferAccountsIdsArePositive( originAccountId, targetAccountId);
+    }
+
+    public static void validateIfTransferAccountsIdsAreNull(Long originAccountId, Long targetAccountId)
+            throws FatalErrorException, RequiredAttributeException {
+
+        if(originAccountId == null && targetAccountId == null) {
+            throw new FatalErrorException( NotificationMessage.requiredAccounts() );
+
+        } else if(originAccountId == null) {
+            throw new RequiredAttributeException( NotificationMessage.originAccountRequired() );
+
+        } else if(targetAccountId == null) {
+            throw new RequiredAttributeException( NotificationMessage.targetAccountRequired());
+        }
+    }
+
+    public static void validateIfTransferAccountsIdsArePositive(Long originAccountId, Long targetAccountId)
+            throws FatalErrorException, InvalidAttributeException {
+
+        if(!isPositive(originAccountId) && !isPositive(targetAccountId)) {
+            throw new FatalErrorException( NotificationMessage.invalidAccounts() );
+
+        } else if( !isPositive(originAccountId) ) {
+            throw new InvalidAttributeException( NotificationMessage.invalidOriginAccount() );
+
+        } else if( !isPositive(targetAccountId) ) {
+            throw new InvalidAttributeException( NotificationMessage.invalidTargetAccount() );
+        }
+    }
+
+    public static void validateAmountTransfer(BigDecimal amount) throws RequiredAttributeException, InvalidAttributeException {
+        if (amount == null)
+            throw new RequiredAttributeException( NotificationMessage.requiredAmount() );
+
+        // region Validar si amount es un número
+        /*Cuando en el BODY se pasa un string en el amount, al realizarse la deserialización para crear el objeto transfer
+         * se lanza una excepción, ya que se espera que el amount de transfer sea un big decimal, y en este proceso
+         * se intenta convertir el campo amount a BigDecimal pero no es posible. Esta excepción la lanza Jackson
+
+         * Se encontro una posible solución para realizar la validación, mapeando el body "manualmente" con un map<string,string>
+         * en el parametro de este método para extraer el amount como string y luego convertirlo a BigDecimal y atrapar la
+         *  excepción si no es posible realizar la conversión con un try-catch pero no me parece una buena solución,
+         * por lo que por ahora se dejara el metodo sin validar si es un bigdecimal o no*/
+//        Método anterior que no funciona
+//        try {
+//            transfer.getAmount().doubleValue();
+//        } catch (NumberFormatException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monto debe ser un número válido.");
+//        }
+        // endregion
+        if(!ControllerValidation.isPositive(amount)) {
+            throw new InvalidAttributeException( NotificationMessage.invalidAmount(amount) );
         }
     }
     // endregion
+
 }

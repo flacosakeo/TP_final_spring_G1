@@ -25,7 +25,6 @@ public class UserService {
     public UserService(UserRepository repository, AccountService servicioCuenta) {
         this.repository = repository;
         this.servicioCuenta = servicioCuenta;
-
     }
 
     public List<UserDTO> getUsers() {

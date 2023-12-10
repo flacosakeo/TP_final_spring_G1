@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
+import com.proyectoFinal.homebanking.tools.validations.serviceValidations.TransferServiceValidation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,10 +38,8 @@ public class TransferService {
                 .collect(Collectors.toList());
     }
     
-    public TransferDTO getTransferById(Long id) {
-        Transfer transfer = transferRepository.findById(id).orElseThrow(() ->
-            new EntityNotFoundException(NotificationMessage.transferNotFound(id)));
-
+    public TransferDTO getTransferById(Long id) throws EntityNotFoundException {
+        Transfer transfer = TransferServiceValidation.findTransferById(id);
         return TransferMapper.transferToDto(transfer);
     }
     
