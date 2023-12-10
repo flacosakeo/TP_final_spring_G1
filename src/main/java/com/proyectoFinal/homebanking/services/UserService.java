@@ -39,11 +39,11 @@ public class UserService {
         if(UserValidation.existUserByEmail(dto.getEmail()) )
             throw new EntityAttributeExistsException( NotificationMessage.userEmailAttributeExists(dto.getEmail()));
 
-        if( UserValidation.existUserByDni(dto.getDni()) )
-            throw new EntityAttributeExistsException( NotificationMessage.userDniExists(dto.getDni()) );
-
         if( UserValidation.existUserByUsername(dto.getUsername()) )
             throw new EntityAttributeExistsException( NotificationMessage.userUsernameExists(dto.getDni()) );
+
+        if( UserValidation.existUserByDni(dto.getDni()) )
+            throw new EntityAttributeExistsException( NotificationMessage.userDniExists(dto.getDni()) );
 
         // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
         User userSaved = repository.save(UserMapper.dtoToUser(dto));

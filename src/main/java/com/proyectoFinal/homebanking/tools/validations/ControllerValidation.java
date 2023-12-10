@@ -1,5 +1,8 @@
 package com.proyectoFinal.homebanking.tools.validations;
 
+import com.proyectoFinal.homebanking.models.DTO.UserDTO;
+import com.proyectoFinal.homebanking.tools.NotificationMessage;
+
 import java.math.BigDecimal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +28,28 @@ public class ControllerValidation {
     // endregion
 
     // region ------------------  USER CONTROLLER VALIDATIONS  ------------------
+    public static String validateCreateUserDto(UserDTO dto) {
+
+        if(!ControllerValidation.emailIsValid(dto.getEmail()))
+            return NotificationMessage.invalidEmail(dto.getEmail());
+
+        if(!ControllerValidation.passwordIsValid(dto.getPassword()))
+            return NotificationMessage.invalidPassword();
+
+        if(!ControllerValidation.nameIsValid(dto.getName()))
+            return NotificationMessage.invalidName();
+
+        if(!ControllerValidation.usernameIsValid(dto.getUsername()))
+            return NotificationMessage.usernameInvalid();
+
+        // Verificar si el DNI es válido y asi con cada atributo
+        if( !ControllerValidation.dniNumberDigitsIsValid(dto.getDni()) )
+            return NotificationMessage.dniNotFound(dto.getDni());
+
+        return "OK";
+    }
+
+
     // Valida que el dni tenga 8 digitos
     public static Boolean dniNumberDigitsIsValid(String dni) {
         // DNI a verificar viene por el parametro. Si no se pasa tal atributo, no se analiza mas nada.

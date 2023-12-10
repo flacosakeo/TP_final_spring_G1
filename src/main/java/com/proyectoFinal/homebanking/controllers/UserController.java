@@ -4,7 +4,6 @@ import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.services.UserService;
 import java.util.List;
 
-import com.proyectoFinal.homebanking.tools.NotificationMessage;
 import com.proyectoFinal.homebanking.tools.validations.ControllerValidation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,21 +38,9 @@ public class UserController {
     @PostMapping()
     public ResponseEntity<?> createUser(@RequestBody UserDTO dto){
 
-        // Verificar si el DNI es válido y asi con cada atributo
-        if( !ControllerValidation.dniNumberDigitsIsValid(dto.getDni()) )
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( NotificationMessage.dniNotFound(dto.getDni()) );
-
-        if(!ControllerValidation.emailIsValid(dto.getEmail()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( NotificationMessage.invalidEmail(dto.getEmail()) );
-
-        if(!ControllerValidation.passwordIsValid(dto.getPassword()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( NotificationMessage.invalidPassword() );
-
-        if(!ControllerValidation.nameIsValid(dto.getName()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( NotificationMessage.invalidName() );
-
-        if(!ControllerValidation.usernameIsValid(dto.getUsername()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( NotificationMessage.usernameInvalid() );
+        String responseValidation = ControllerValidation.validateCreateUserDto(dto);
+        if( responseValidation.equals("OK") )
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( responseValidation );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(dto));
     }
