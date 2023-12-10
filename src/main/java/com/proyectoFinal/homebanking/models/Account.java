@@ -25,7 +25,7 @@ import lombok.*;
 public class Account {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="id")
+    @Column(name="id_account")
     private Long id;
     
     @Column(name="account_type")

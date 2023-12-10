@@ -65,11 +65,11 @@ public class NotificationMessage {
     // region ------------------  USERS ERROR MESSAGES  ------------------
     // region  ------------  CONTROLLER  ------------
     public static String dniNotFound(String dni) {
-        return "¡El DNI '" + dni.toUpperCase() + "' no es valido! ¡Debe contener 8 caracteres numericos!";
+        return "¡El DNI '" + dni + "' no es valido! ¡Debe contener 8 caracteres numericos!";
     }
 
     public static String invalidEmail(String email) {
-        return "¡El EMAIL ingresado '" + email.toUpperCase() + "' no es valido! ¡Intente nuevamente!";
+        return "¡El EMAIL ingresado '" + email + "' no es valido! ¡Intente nuevamente!";
     }
 
     public static String invalidPassword() {
@@ -92,7 +92,7 @@ public class NotificationMessage {
     }
 
     public static String userEmailAttributeExists(String email) {
-        return "¡Email " + email.toUpperCase() + " ya registrado!";
+        return "¡Email " + email + " ya registrado!";
     }
 
     public static String userDniExists(String dni) {
@@ -100,7 +100,7 @@ public class NotificationMessage {
     }
 
     public static String userUsernameExists(String email) {
-        return "¡Ya existe un usuario con el USERNAME: '" + email.toUpperCase() + "'!";
+        return "¡Ya existe un usuario con el USERNAME: '" + email + "'!";
     }
 
     public static String userDeleted() {
