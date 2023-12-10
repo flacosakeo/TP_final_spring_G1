@@ -2,22 +2,10 @@ package com.proyectoFinal.homebanking.tools;
 
 import java.math.BigDecimal;
 
-public class ErrorMessage {
+public class NotificationMessage {
 
     // region ------------------  TRANSFERS ERROR MESSAGES  ------------------
     // region  ------------  CONTROLLER  ------------
-
-    // endregion
-
-    // region  ------------  SERVICE  ------------
-    public static String transferNotFound(Long id) {
-        return "¡La transferencia con ID '" + id + "' NO fue encontrada!";
-    }
-
-    public static String transferSuccessfullyDeleted(Long id) {
-        return "¡La transferencia con ID '" + id + "' ha sido eliminada!";
-    }
-
     public static String requiredAccount() {
         return "La cuenta de origen o la cuenta de destino es requerida.";
     }
@@ -29,6 +17,16 @@ public class ErrorMessage {
     public static String invalidAmount(BigDecimal amount) {
         return "Monto invalido: $" + amount + ". Debe ingresar un monto mayor a $0.";
     }
+    // endregion
+
+    // region  ------------  SERVICE  ------------
+    public static String transferNotFound(Long id) {
+        return "¡La transferencia con ID '" + id + "' NO fue encontrada!";
+    }
+
+    public static String transferSuccessfullyDeleted(Long id) {
+        return "¡La transferencia con ID '" + id + "' ha sido eliminada!";
+    }
     //endregion
     // endregion
 
@@ -39,6 +37,10 @@ public class ErrorMessage {
     // region  ------------  SERVICE  ------------
     public static String accountNotFound(Long id) {
         return "¡La cuenta con ID '" + id + "' NO fue encontrada!";
+    }
+
+    public static String accountSuccessfullyDeleted(Long id) {
+        return "¡La cuenta con ID '" + id + "' ha sido eliminada!";
     }
 
     public static String originAccountNotFound(Long id) {
@@ -112,8 +114,6 @@ public class ErrorMessage {
     public static String userNullAttributes() {
         return "¡Uno o varios de los atributos enviados son nulos!";
     }
-
-
     // endregion
     // endregion
 }

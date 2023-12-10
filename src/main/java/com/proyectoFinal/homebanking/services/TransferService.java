@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.proyectoFinal.homebanking.tools.ErrorMessage;
+import com.proyectoFinal.homebanking.tools.NotificationMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,7 +39,7 @@ public class TransferService {
     
     public TransferDTO getTransferById(Long id) {
         Transfer transfer = transferRepository.findById(id).orElseThrow(() ->
-            new EntityNotFoundException(ErrorMessage.transferNotFound(id)));
+            new EntityNotFoundException(NotificationMessage.transferNotFound(id)));
 
         return TransferMapper.transferToDto(transfer);
     }
@@ -47,9 +47,9 @@ public class TransferService {
     public String deleteTransfer(Long id) {
         if (transferRepository.existsById(id)) {
             transferRepository.deleteById(id);
-            return ErrorMessage.transferSuccessfullyDeleted(id);
+            return NotificationMessage.transferSuccessfullyDeleted(id);
         } else {
-            throw new EntityNotFoundException(ErrorMessage.transferNotFound(id));
+            throw new EntityNotFoundException(NotificationMessage.transferNotFound(id));
         }
     }
 
@@ -61,21 +61,21 @@ public class TransferService {
 
         //verifica si ambas cuentas son iguales
         if(Objects.equals(originAccountId, targetAccountId)) {
-            throw new AccountsAreTheSameException(ErrorMessage.equalAccounts(originAccountId, targetAccountId));
+            throw new AccountsAreTheSameException(NotificationMessage.equalAccounts(originAccountId, targetAccountId));
         }
 
         //verificar que las cuentas origen y destino existan
         Account originAccount = accountRepository.findById( originAccountId )
-                             .orElseThrow( () -> new EntityNotFoundException( ErrorMessage.originAccountNotFound(
+                             .orElseThrow( () -> new EntityNotFoundException( NotificationMessage.originAccountNotFound(
                                      originAccountId )));
 
         Account destinationAccount = accountRepository.findById( targetAccountId )
-                             .orElseThrow(() -> new EntityNotFoundException(ErrorMessage.destinationAccountNotFound(
+                             .orElseThrow(() -> new EntityNotFoundException(NotificationMessage.destinationAccountNotFound(
                                      targetAccountId )));
         
         // Verifica si la cuenta origen tiene fondos
         if (originAccount.getMonto().compareTo(dto.getAmount()) < 0) {
-            throw new InsufficientFoundsException( ErrorMessage.insufficientFounds( originAccountId ));
+            throw new InsufficientFoundsException( NotificationMessage.insufficientFounds( originAccountId ));
         }
         
         // Se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
@@ -105,7 +105,7 @@ public class TransferService {
             Long targetAccountId = dto.getTargetAccountId();
 
             Transfer transferToModify = transferRepository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException( ErrorMessage.transferNotFound(id) ));
+                    new EntityNotFoundException( NotificationMessage.transferNotFound(id) ));
 
             // LÓGICA DEL PATCH
             if(dto.getAmount() != null)
@@ -123,7 +123,7 @@ public class TransferService {
             Transfer transferModified = transferRepository.save(transferToModify);
             return TransferMapper.transferToDto(transferModified);
         }
-        throw new EntityNotFoundException(ErrorMessage.transferNotFound(id));
+        throw new EntityNotFoundException(NotificationMessage.transferNotFound(id));
     }
 }
 

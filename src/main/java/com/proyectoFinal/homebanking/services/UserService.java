@@ -13,7 +13,7 @@ import com.proyectoFinal.homebanking.repositories.UserRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.proyectoFinal.homebanking.tools.ErrorMessage;
+import com.proyectoFinal.homebanking.tools.NotificationMessage;
 import com.proyectoFinal.homebanking.tools.validations.serviceValidations.UserValidation;
 import org.springframework.stereotype.Service;
 
@@ -37,13 +37,13 @@ public class UserService {
     
     public UserDTO createUser(UserDTO dto){
         if(UserValidation.existUserByEmail(dto.getEmail()) )
-            throw new EntityAttributeExistsException( ErrorMessage.userEmailAttributeExists(dto.getEmail()));
+            throw new EntityAttributeExistsException( NotificationMessage.userEmailAttributeExists(dto.getEmail()));
 
         if( UserValidation.existUserByDni(dto.getDni()) )
-            throw new EntityAttributeExistsException( ErrorMessage.userDniExists(dto.getDni()) );
+            throw new EntityAttributeExistsException( NotificationMessage.userDniExists(dto.getDni()) );
 
         if( UserValidation.existUserByUsername(dto.getUsername()) )
-            throw new EntityAttributeExistsException( ErrorMessage.userUsernameExists(dto.getDni()) );
+            throw new EntityAttributeExistsException( NotificationMessage.userUsernameExists(dto.getDni()) );
 
         // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
         User userSaved = repository.save(UserMapper.dtoToUser(dto));
@@ -51,7 +51,6 @@ public class UserService {
         AccountDTO accountDTO1 = new AccountDTO();
         accountDTO1.setTipo(AccountType.CAJA_DE_AHORRO);
         //accountDTO1.setUser_id(userDTO.getId());
-        accountDTO1.setDueño(dto.getName());
         servicioCuenta.createAccount( accountDTO1);
 
         return UserMapper.userToDto(userSaved);
@@ -59,24 +58,24 @@ public class UserService {
     
     public UserDTO getUserById(Long id){
         User entity = repository.findById(id).orElseThrow( () ->
-                new EntityNotFoundException( ErrorMessage.userNotFound(id)) );
+                new EntityNotFoundException( NotificationMessage.userNotFound(id)) );
         return UserMapper.userToDto(entity);
     }
 
     public String deleteUser(Long id){
         if (repository.existsById(id)){
             repository.deleteById(id);
-            return ErrorMessage.userDeleted();
+            return NotificationMessage.userDeleted();
         }else{
             //TODO: retornar una excepcion(? Extrapolacion para todas las demas entidades...
-            return ErrorMessage.userNotFound(id);
+            return NotificationMessage.userNotFound(id);
         }
     }
     
     public UserDTO updateUser(Long id, UserDTO dto){
         if(repository.existsById(id)){
             User userToModify = repository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException( ErrorMessage.userNotFound(id)) );
+                    new EntityNotFoundException( NotificationMessage.userNotFound(id)) );
 
             // LÓGICA DEL PATCH
             if(dto.getName() != null)
@@ -97,7 +96,7 @@ public class UserService {
             User userModified = repository.save(userToModify);
             return UserMapper.userToDto(userModified);
         }
-        throw new EntityNotFoundException( ErrorMessage.userNotFound(id) );
+        throw new EntityNotFoundException( NotificationMessage.userNotFound(id) );
     }
 
     public UserDTO updateAllUser(Long id, UserDTO dto) {
@@ -110,7 +109,7 @@ public class UserService {
 
             // Consigo el usuario a modificar desde la BD
             User userToModify = repository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException( ErrorMessage.userNotFound(id) ));
+                    new EntityNotFoundException( NotificationMessage.userNotFound(id) ));
 
             // LÓGICA DEL PUT
             userToModify.setEmail(dto.getEmail());
@@ -126,13 +125,13 @@ public class UserService {
         }
 
         if(!repository.existsById(id) && !UserValidation.validateUserDtoAttributes(dto))
-            throw new FatalErrorException(ErrorMessage.userNotFoundAndNullAttributes(id));
+            throw new FatalErrorException(NotificationMessage.userNotFoundAndNullAttributes(id));
 
         if(!repository.existsById(id))
-            throw new EntityNotFoundException( ErrorMessage.userNotFound(id) );
+            throw new EntityNotFoundException( NotificationMessage.userNotFound(id) );
 
         if(!UserValidation.validateUserDtoAttributes(dto))
-            throw new EntityNullAttributesException( ErrorMessage.userNullAttributes());
+            throw new EntityNullAttributesException( NotificationMessage.userNullAttributes());
 
         return null;
     }

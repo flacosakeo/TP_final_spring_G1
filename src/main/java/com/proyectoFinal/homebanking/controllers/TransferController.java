@@ -4,7 +4,7 @@ import com.proyectoFinal.homebanking.models.DTO.TransferDTO;
 import com.proyectoFinal.homebanking.services.TransferService;
 import java.util.List;
 
-import com.proyectoFinal.homebanking.tools.ErrorMessage;
+import com.proyectoFinal.homebanking.tools.NotificationMessage;
 import com.proyectoFinal.homebanking.tools.validations.ControllerValidation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,11 +46,11 @@ public class TransferController {
         Long targetAccountId = transfer.getTargetAccountId();
 
         if(originAccountId == null || targetAccountId == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorMessage.requiredAccount());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(NotificationMessage.requiredAccount());
         }
 
         if (transfer.getAmount() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorMessage.requiredAmount());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(NotificationMessage.requiredAmount());
         }
 
         if(!ControllerValidation.isPositive(originAccountId) || (!ControllerValidation.isPositive(targetAccountId))){
@@ -77,7 +77,7 @@ public class TransferController {
         // endregion
 
         if(!ControllerValidation.isPositive(transfer.getAmount())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ErrorMessage.invalidAmount(transfer.getAmount()) );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( NotificationMessage.invalidAmount(transfer.getAmount()) );
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createTransfer(transfer));

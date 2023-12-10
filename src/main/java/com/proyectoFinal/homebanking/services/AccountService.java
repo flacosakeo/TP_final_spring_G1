@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import com.proyectoFinal.homebanking.tools.ErrorMessage;
+import com.proyectoFinal.homebanking.tools.NotificationMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,10 +24,9 @@ public class AccountService {
     
     public List<AccountDTO> getAccount(){
         List<Account> accounts = repository.findAll();
-        List<AccountDTO> accountsDTO=accounts.stream()
+        return accounts.stream()
                 .map(AccountMapper::accountToDto)                
                 .collect(Collectors.toList());
-        return accountsDTO;
     }
 
     public Object createAccount(AccountDTO accountDTO){
@@ -48,16 +47,17 @@ public class AccountService {
     }
     
     public AccountDTO getAccountById(Long id){
-        Account entity = repository.findById(id).get();
+        Account entity = repository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
         return AccountMapper.accountToDto(entity);
     }
     
     public String deleteAccount(Long id){
         if (repository.existsById(id)){
             repository.deleteById(id);
-            return "Eliminado";
+            return NotificationMessage.accountSuccessfullyDeleted(id);
         }else{
-            return "Cuenta no existe";
+            throw new EntityNotFoundException( NotificationMessage.accountNotFound(id) );
         }       
     }
     
@@ -65,23 +65,22 @@ public class AccountService {
     //Account cbuValidate = repository.findByCbu(dto.getCbu());
     //if(cbuValidate==null){
         if(repository.existsById(id)){
-            Account accountToModify=repository.findById(id).get();
-            //logica del patch
-            if (dto.getTipo()!=null){
+            Account accountToModify=repository.findById(id).orElseThrow(() ->
+                    new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
+
+            // LÓGICA DEL PATCH
+            //if (dto.getTipo() != null)
                 //accountToModify.setTipo(dto.getTipo());
-            }
-            if (dto.getDueño()!=null){
-                accountToModify.setDueño(dto.getDueño());
-            }
-            if (dto.getCbu()!=null){
+
+            //if (dto.getCbu() != null)
                 //accountToModify.setCbu(dto.getCbu());
-            }
-            if (dto.getAlias()!=null){
+
+            if (dto.getAlias() != null)
                 accountToModify.setAlias(dto.getAlias());
-            }
-            if (dto.getMonto()!=null){
+
+            if (dto.getMonto() != null)
                 accountToModify.setMonto(dto.getMonto());
-            }
+
             repository.save(accountToModify);
             return AccountMapper.accountToDto(accountToModify);
         }
@@ -95,7 +94,7 @@ public class AccountService {
     public AccountDTO depositMoney(Long id, BigDecimal amount){
         if(repository.existsById(id)){
             Account accountToModify = repository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException(ErrorMessage.accountNotFound(id)));
+                    new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
 
             //TODO: dejo estos comentarios para luego realizar las validaciones
 //            if (accountToModify.getMonto() == null) {
@@ -110,17 +109,17 @@ public class AccountService {
             Account accountModified = repository.save(accountToModify);
             return AccountMapper.accountToDto(accountModified);
         }
-        throw new EntityNotFoundException(ErrorMessage.accountNotFound(id));
+        throw new EntityNotFoundException(NotificationMessage.accountNotFound(id));
     }
 
-    public AccountDTO extractMoney(Long id, BigDecimal amount){
+    public AccountDTO extractMoney(Long id, BigDecimal amount) {
         if(repository.existsById(id)){
             Account accountToModify = repository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException(ErrorMessage.accountNotFound(id)));
+                    new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
 
             //verifica si la cuenta origen tiene fondos
-            if (accountToModify.getMonto().compareTo(amount) < 0){
-                throw new InsufficientFoundsException( ErrorMessage.insufficientFounds(accountToModify.getId_account()));
+            if (accountToModify.getMonto().compareTo(amount) < 0) {
+                throw new InsufficientFoundsException( NotificationMessage.insufficientFounds(accountToModify.getId_account()));
             }
 
             //se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
@@ -129,7 +128,7 @@ public class AccountService {
             Account accountModified = repository.save(accountToModify);
             return AccountMapper.accountToDto(accountModified);
         }
-        throw new EntityNotFoundException(ErrorMessage.accountNotFound(id));
+        throw new EntityNotFoundException(NotificationMessage.accountNotFound(id));
     }
 
     private String generadorCbu(){

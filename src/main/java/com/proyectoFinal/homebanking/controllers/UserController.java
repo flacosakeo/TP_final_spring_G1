@@ -4,7 +4,7 @@ import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.services.UserService;
 import java.util.List;
 
-import com.proyectoFinal.homebanking.tools.ErrorMessage;
+import com.proyectoFinal.homebanking.tools.NotificationMessage;
 import com.proyectoFinal.homebanking.tools.validations.ControllerValidation;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,19 +41,19 @@ public class UserController {
 
         // Verificar si el DNI es válido y asi con cada atributo
         if( !ControllerValidation.dniNumberDigitsIsValid(dto.getDni()) )
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ErrorMessage.dniNotFound(dto.getDni()) );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( NotificationMessage.dniNotFound(dto.getDni()) );
 
         if(!ControllerValidation.emailIsValid(dto.getEmail()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ErrorMessage.invalidEmail(dto.getEmail()) );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( NotificationMessage.invalidEmail(dto.getEmail()) );
 
         if(!ControllerValidation.passwordIsValid(dto.getPassword()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ErrorMessage.invalidPassword() );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( NotificationMessage.invalidPassword() );
 
         if(!ControllerValidation.nameIsValid(dto.getName()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ErrorMessage.invalidName() );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( NotificationMessage.invalidName() );
 
         if(!ControllerValidation.usernameIsValid(dto.getUsername()))
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( ErrorMessage.usernameInvalid() );
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( NotificationMessage.usernameInvalid() );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(dto));
     }
