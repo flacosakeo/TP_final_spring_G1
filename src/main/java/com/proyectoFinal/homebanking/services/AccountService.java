@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import com.proyectoFinal.homebanking.tools.ErrorMessage;
+import com.proyectoFinal.homebanking.tools.validations.serviceValidations.AccountValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,14 +38,11 @@ public class AccountService {
         accountDTO.setAlias(AccountAlias.values()[new Random().nextInt(AccountAlias.values().length)]);
         //accountDTO.setTipo (AccountType.values()[new Random().nextInt(AccountType.values().length)]);
         accountDTO.setMonto(BigDecimal.ZERO);
-        accountDTO.setCbu(generadorCbu());
-        Account cbuValidate = repository.findByCbu(accountDTO.getCbu());
-        if (cbuValidate==null){
-            Account account = repository.save(AccountMapper.dtoToAccount(accountDTO));
-            return AccountMapper.accountToDto(account);
-        }else{
-            return "Cbu ya existe";
-        }
+        accountDTO.setCbu(AccountValidation.generateValidCbu());
+
+        Account account = repository.save(AccountMapper.dtoToAccount(accountDTO));
+        return AccountMapper.accountToDto(account);
+
     }
     
     public AccountDTO getAccountById(Long id){
