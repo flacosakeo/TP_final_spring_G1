@@ -30,7 +30,7 @@ public class ControllerValidation {
 
     // region ------------------  USER CONTROLLER VALIDATIONS  ------------------
     public static void validateCreateUserDto(UserDTO dto) {
-
+    //TODO: Validar si los atributos son nulos
         if(!ControllerValidation.emailIsValid(dto.getEmail()))
             throw new InvalidAttributeException( NotificationMessage.invalidEmail(dto.getEmail()) );
 
@@ -80,7 +80,7 @@ public class ControllerValidation {
     public static Boolean passwordIsValid(String password){
         if(password == null) return false;
 
-        Pattern pattern = Pattern.compile(".{8}");
+        Pattern pattern = Pattern.compile(".{8,}");
         Matcher matcher = pattern.matcher(password);
 
         return matcher.matches();

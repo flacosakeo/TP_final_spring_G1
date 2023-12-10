@@ -24,22 +24,22 @@ public class User {
     
     @Id//establece que este campo es PK
     @GeneratedValue(strategy=GenerationType.IDENTITY)//establece que el campo es autoincremenatl
-    @Column(name="user_id")
+    @Column(name="id_user")
     private Long id;
     
-    @Column(name="correo")//le cambia el nombre a la columna en la tabla
+    @Column(name="email")//le cambia el nombre a la columna en la tabla
     private String email;
     
-    @Column(name="contraseña")
+    @Column(name="password")
     private String password;
     
-    @Column(name="nombre")
+    @Column(name="name")
     private String name;
     
-    @Column(name="usuario")
+    @Column(name="username")
     private String username;
     
-    @Column(name="documento")
+    @Column(name="dni")
     private String dni;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
