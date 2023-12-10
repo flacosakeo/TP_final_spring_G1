@@ -37,9 +37,8 @@ public class UserController {
     
     @PostMapping()
     public ResponseEntity<?> createUser(@RequestBody UserDTO dto){
-
         String responseValidation = ControllerValidation.validateCreateUserDto(dto);
-        if( responseValidation.equals("OK") )
+        if( !responseValidation.equals("OK") )
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( responseValidation );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(dto));

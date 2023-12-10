@@ -2,14 +2,28 @@ package com.proyectoFinal.homebanking.tools.validations.serviceValidations;
 
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.repositories.UserRepository;
+import com.proyectoFinal.homebanking.tools.NotificationMessage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserValidation {
+public class UserServiceValidation {
     public static UserRepository repository;
 
-    public UserValidation(UserRepository repository) {
-        UserValidation.repository = repository;
+    public UserServiceValidation(UserRepository repository) {
+        UserServiceValidation.repository = repository;
+    }
+
+    public static String validateCreateUserDto(UserDTO dto) {
+        if(UserServiceValidation.existUserByEmail(dto.getEmail()) )
+            return NotificationMessage.userEmailAttributeExists(dto.getEmail());
+
+        if( UserServiceValidation.existUserByUsername(dto.getUsername()) )
+            return NotificationMessage.userUsernameExists(dto.getDni());
+
+        if( UserServiceValidation.existUserByDni(dto.getDni()) )
+            return NotificationMessage.userDniExists(dto.getDni());
+
+        return "OK";
     }
 
     // Valida que existan usuarios unicos por mail

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
-import com.proyectoFinal.homebanking.tools.validations.serviceValidations.UserValidation;
+import com.proyectoFinal.homebanking.tools.validations.serviceValidations.UserServiceValidation;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,14 +36,9 @@ public class UserService {
     }
     
     public UserDTO createUser(UserDTO dto){
-        if(UserValidation.existUserByEmail(dto.getEmail()) )
-            throw new EntityAttributeExistsException( NotificationMessage.userEmailAttributeExists(dto.getEmail()));
-
-        if( UserValidation.existUserByUsername(dto.getUsername()) )
-            throw new EntityAttributeExistsException( NotificationMessage.userUsernameExists(dto.getDni()) );
-
-        if( UserValidation.existUserByDni(dto.getDni()) )
-            throw new EntityAttributeExistsException( NotificationMessage.userDniExists(dto.getDni()) );
+        String responseValidation = UserServiceValidation.validateCreateUserDto(dto);
+        if( !responseValidation.equals("OK") )
+            throw new EntityAttributeExistsException( responseValidation );
 
         // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
         User userSaved = repository.save(UserMapper.dtoToUser(dto));
@@ -105,7 +100,7 @@ public class UserService {
         //TODO: refactor.. bajar esta logica del if debajo de todas las validaciones y
         // eliminar el IF, ya que parece que es innecesario al hacer tal cambio.
         // y se eliminaria el return null tambien.
-        if(repository.existsById(id) && UserValidation.validateUserDtoAttributes(dto)) {
+        if(repository.existsById(id) && UserServiceValidation.validateUserDtoAttributes(dto)) {
 
             // Consigo el usuario a modificar desde la BD
             User userToModify = repository.findById(id).orElseThrow( () ->
@@ -124,13 +119,13 @@ public class UserService {
             return UserMapper.userToDto(userModified);
         }
 
-        if(!repository.existsById(id) && !UserValidation.validateUserDtoAttributes(dto))
+        if(!repository.existsById(id) && !UserServiceValidation.validateUserDtoAttributes(dto))
             throw new FatalErrorException(NotificationMessage.userNotFoundAndNullAttributes(id));
 
         if(!repository.existsById(id))
             throw new EntityNotFoundException( NotificationMessage.userNotFound(id) );
 
-        if(!UserValidation.validateUserDtoAttributes(dto))
+        if(!UserServiceValidation.validateUserDtoAttributes(dto))
             throw new EntityNullAttributesException( NotificationMessage.userNullAttributes());
 
         return null;
