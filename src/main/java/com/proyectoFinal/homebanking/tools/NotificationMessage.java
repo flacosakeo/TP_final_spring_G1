@@ -4,6 +4,10 @@ import java.math.BigDecimal;
 
 public class NotificationMessage {
 
+    public static String illegalArgument() {
+        return "Tipo de número no compatible. Se esperaba Double, Float, Integer o Long.";
+    }
+
     // region ------------------  TRANSFERS ERROR MESSAGES  ------------------
     // region  ------------  CONTROLLER  ------------
     public static String requiredAccounts() {

@@ -26,7 +26,7 @@ public class ControllerValidation {
         } else if (number instanceof BigDecimal) {
             return (((BigDecimal) number).compareTo(BigDecimal.ZERO) > 0);
         } else {
-            throw new IllegalArgumentException("Tipo de número no compatible. Se esperaba Double, Float, Integer o Long.");
+            throw new IllegalArgumentException( NotificationMessage.illegalArgument() );
         }
     }
     // endregion
@@ -112,14 +112,14 @@ public class ControllerValidation {
 
     // region ------------------  TRANSFER CONTROLLER VALIDATIONS  ------------------
     public static void validateTransferDto(TransferDTO dto) throws FatalErrorException, RequiredAttributeException,
-            InvalidAttributeException {
+            InvalidAttributeException, IllegalArgumentException {
 
         validateTransferAccountIds(dto.getOriginAccountId(), dto.getTargetAccountId() );
         validateAmountTransfer(dto.getAmount());
     }
 
     public static void validateTransferAccountIds(Long originAccountId, Long targetAccountId)
-            throws FatalErrorException, RequiredAttributeException, InvalidAttributeException {
+            throws FatalErrorException, RequiredAttributeException, InvalidAttributeException, IllegalArgumentException {
 
         validateIfTransferAccountsIdsAreNull(originAccountId, targetAccountId);
         validateIfTransferAccountsIdsArePositive( originAccountId, targetAccountId);
@@ -140,7 +140,7 @@ public class ControllerValidation {
     }
 
     public static void validateIfTransferAccountsIdsArePositive(Long originAccountId, Long targetAccountId)
-            throws FatalErrorException, InvalidAttributeException {
+            throws FatalErrorException, InvalidAttributeException, IllegalArgumentException {
 
         if(!isPositive(originAccountId) && !isPositive(targetAccountId)) {
             throw new FatalErrorException( NotificationMessage.invalidAccounts() );
@@ -153,7 +153,8 @@ public class ControllerValidation {
         }
     }
 
-    public static void validateAmountTransfer(BigDecimal amount) throws RequiredAttributeException, InvalidAttributeException {
+    public static void validateAmountTransfer(BigDecimal amount) throws RequiredAttributeException,
+            InvalidAttributeException, IllegalArgumentException {
         if (amount == null)
             throw new RequiredAttributeException( NotificationMessage.requiredAmount() );
 

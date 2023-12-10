@@ -53,7 +53,7 @@ public class TransferController {
             ControllerValidation.validateTransferDto(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(service.createTransfer(dto));
 
-        } catch(FatalErrorException | RequiredAttributeException | InvalidAttributeException error) {
+        } catch(FatalErrorException | RequiredAttributeException | InvalidAttributeException | IllegalArgumentException error) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
         }
     }
@@ -68,6 +68,4 @@ public class TransferController {
         return ResponseEntity.status(HttpStatus.OK).body(service.updateTransfer(id, transfer));
     }
     
-
-
 }
