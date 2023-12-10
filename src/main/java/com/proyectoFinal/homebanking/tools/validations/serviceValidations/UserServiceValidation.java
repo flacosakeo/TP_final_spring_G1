@@ -1,6 +1,11 @@
 package com.proyectoFinal.homebanking.tools.validations.serviceValidations;
 
+import com.proyectoFinal.homebanking.exceptions.EntityAttributeExistsException;
+import com.proyectoFinal.homebanking.exceptions.EntityNotFoundException;
+import com.proyectoFinal.homebanking.exceptions.EntityNullAttributesException;
+import com.proyectoFinal.homebanking.exceptions.FatalErrorException;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
+import com.proyectoFinal.homebanking.models.User;
 import com.proyectoFinal.homebanking.repositories.UserRepository;
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
 import org.springframework.stereotype.Component;
@@ -13,17 +18,28 @@ public class UserServiceValidation {
         UserServiceValidation.repository = repository;
     }
 
-    public static String validateCreateUserDto(UserDTO dto) {
+    public static void validateCreateUserDto(UserDTO dto) throws EntityAttributeExistsException {
         if(UserServiceValidation.existUserByEmail(dto.getEmail()) )
-            return NotificationMessage.userEmailAttributeExists(dto.getEmail());
+            throw new EntityAttributeExistsException( NotificationMessage.userEmailAttributeExists(dto.getEmail()) );
 
         if( UserServiceValidation.existUserByUsername(dto.getUsername()) )
-            return NotificationMessage.userUsernameExists(dto.getUsername());
+            throw new EntityAttributeExistsException( NotificationMessage.userUsernameExists(dto.getUsername()) );
 
         if( UserServiceValidation.existUserByDni(dto.getDni()) )
-            return NotificationMessage.userDniExists(dto.getDni());
+            throw new EntityAttributeExistsException( NotificationMessage.userDniExists(dto.getDni()) );
+    }
 
-        return "OK";
+    public static void validateUpdateAllUser(UserDTO dto) throws FatalErrorException, EntityNotFoundException,
+            EntityNullAttributesException {
+
+        if(!UserServiceValidation.existUserById(dto.getId()) && !UserServiceValidation.validateUserDtoAttributes(dto))
+            throw new FatalErrorException( NotificationMessage.userNotFoundAndNullAttributes(dto.getId()) );
+
+        if(!repository.existsById(dto.getId()))
+            throw new EntityNotFoundException( NotificationMessage.userNotFound(dto.getId()) );
+
+        if(!UserServiceValidation.validateUserDtoAttributes(dto))
+            throw new EntityNullAttributesException( NotificationMessage.userNullAttributes() );
     }
 
     // Valida que existan usuarios unicos por mail
@@ -45,5 +61,14 @@ public class UserServiceValidation {
                 dto.getName() != null &&
                 dto.getUsername() != null &&
                 dto.getDni() != null;
+    }
+
+    public static Boolean existUserById(Long id) {
+        return repository.existsById(id);
+    }
+
+    public static User findUserById(Long id) throws EntityNotFoundException {
+        return repository.findById(id).orElseThrow( () ->
+                new EntityNotFoundException( NotificationMessage.userNotFound(id)) );
     }
 }
