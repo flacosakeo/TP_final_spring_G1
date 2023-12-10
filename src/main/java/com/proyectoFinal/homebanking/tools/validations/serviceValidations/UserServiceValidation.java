@@ -18,7 +18,7 @@ public class UserServiceValidation {
             return NotificationMessage.userEmailAttributeExists(dto.getEmail());
 
         if( UserServiceValidation.existUserByUsername(dto.getUsername()) )
-            return NotificationMessage.userUsernameExists(dto.getDni());
+            return NotificationMessage.userUsernameExists(dto.getUsername());
 
         if( UserServiceValidation.existUserByDni(dto.getDni()) )
             return NotificationMessage.userDniExists(dto.getDni());

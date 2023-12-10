@@ -34,7 +34,13 @@ public class UserService {
                 .map(UserMapper::userToDto)                
                 .collect(Collectors.toList());
     }
-    
+
+    public UserDTO getUserById(Long id){
+        User entity = repository.findById(id).orElseThrow( () ->
+                new EntityNotFoundException( NotificationMessage.userNotFound(id)) );
+        return UserMapper.userToDto(entity);
+    }
+
     public UserDTO createUser(UserDTO dto){
         String responseValidation = UserServiceValidation.validateCreateUserDto(dto);
         if( !responseValidation.equals("OK") )
@@ -43,18 +49,12 @@ public class UserService {
         // Si llega hasta este punto es porque no existe ningún usuario con el mismo email, dni, y username. Puedo crearlo.
         User userSaved = repository.save(UserMapper.dtoToUser(dto));
 
-        AccountDTO accountDTO1 = new AccountDTO();
-        accountDTO1.setTipo(AccountType.CAJA_DE_AHORRO);
+        AccountDTO accountDto = new AccountDTO();
+        accountDto.setTipo(AccountType.CAJA_DE_AHORRO);
         //accountDTO1.setUser_id(userDTO.getId());
-        servicioCuenta.createAccount( accountDTO1);
+        servicioCuenta.createAccount(accountDto);
 
         return UserMapper.userToDto(userSaved);
-    }
-    
-    public UserDTO getUserById(Long id){
-        User entity = repository.findById(id).orElseThrow( () ->
-                new EntityNotFoundException( NotificationMessage.userNotFound(id)) );
-        return UserMapper.userToDto(entity);
     }
 
     public String deleteUser(Long id){
@@ -63,37 +63,10 @@ public class UserService {
             return NotificationMessage.userDeleted();
         }else{
             //TODO: retornar una excepcion(? Extrapolacion para todas las demas entidades...
-            return NotificationMessage.userNotFound(id);
+            throw new EntityNotFoundException( NotificationMessage.userNotFound(id) );
         }
     }
     
-    public UserDTO updateUser(Long id, UserDTO dto){
-        if(repository.existsById(id)){
-            User userToModify = repository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException( NotificationMessage.userNotFound(id)) );
-
-            // LÓGICA DEL PATCH
-            if(dto.getName() != null)
-                userToModify.setName(dto.getName());
-            
-            if(dto.getUsername() != null)
-                userToModify.setUsername(dto.getUsername());
-            
-            if(dto.getDni() != null)
-                userToModify.setDni(dto.getDni());
-            
-            if(dto.getEmail() != null)
-                userToModify.setEmail(dto.getEmail());
-            
-            if(dto.getPassword() != null)
-                userToModify.setPassword(dto.getPassword());
-            
-            User userModified = repository.save(userToModify);
-            return UserMapper.userToDto(userModified);
-        }
-        throw new EntityNotFoundException( NotificationMessage.userNotFound(id) );
-    }
-
     public UserDTO updateAllUser(Long id, UserDTO dto) {
         // Primero verifico si existe un usuario con ese id en la BD
         // Y tambien se valida que todos los datos del "dto" no vienen en null
@@ -129,5 +102,32 @@ public class UserService {
             throw new EntityNullAttributesException( NotificationMessage.userNullAttributes());
 
         return null;
+    }
+
+    public UserDTO updateUser(Long id, UserDTO dto){
+        if(repository.existsById(id)){
+            User userToModify = repository.findById(id).orElseThrow( () ->
+                    new EntityNotFoundException( NotificationMessage.userNotFound(id)) );
+
+            // LÓGICA DEL PATCH
+            if(dto.getName() != null)
+                userToModify.setName(dto.getName());
+
+            if(dto.getUsername() != null)
+                userToModify.setUsername(dto.getUsername());
+
+            if(dto.getDni() != null)
+                userToModify.setDni(dto.getDni());
+
+            if(dto.getEmail() != null)
+                userToModify.setEmail(dto.getEmail());
+
+            if(dto.getPassword() != null)
+                userToModify.setPassword(dto.getPassword());
+
+            User userModified = repository.save(userToModify);
+            return UserMapper.userToDto(userModified);
+        }
+        throw new EntityNotFoundException( NotificationMessage.userNotFound(id) );
     }
 }

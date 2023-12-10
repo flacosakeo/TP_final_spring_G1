@@ -1,5 +1,6 @@
 package com.proyectoFinal.homebanking.controllers;
 
+import com.proyectoFinal.homebanking.exceptions.*;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.services.UserService;
 import java.util.List;
@@ -23,39 +24,61 @@ public class UserController {
     //definir el dto y el service (inyeccion de dependencia)
     //crud:crear,leer,mod,eliminar
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getUsers(){
-        List<UserDTO> lista=service.getUsers();
+    public ResponseEntity<List<UserDTO>> getUsers() {
+        List<UserDTO> usersDtoList = service.getUsers();
         //llamar al servicio de usuarios para obtener la lista de usuarios
-        return ResponseEntity.status(HttpStatus.OK).body(lista);
+        return ResponseEntity.status(HttpStatus.OK).body(usersDtoList);
     }
     
     @GetMapping(value="/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id){ // El @PathVariable guarda el id de la request
-                                                                       // en la variable id de la funcion
-        return ResponseEntity.status(HttpStatus.OK).body(service.getUserById(id));
+    public ResponseEntity<?> getUserById(@PathVariable Long id) { // El @PathVariable guarda el id de la request
+        try {                                                     // en la variable id de la funcion
+            return ResponseEntity.status(HttpStatus.OK).body(service.getUserById(id));
+            
+        } catch(EntityNotFoundException error) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
+        }
     }
     
     @PostMapping()
-    public ResponseEntity<?> createUser(@RequestBody UserDTO dto){
-        String responseValidation = ControllerValidation.validateCreateUserDto(dto);
-        if( !responseValidation.equals("OK") )
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( responseValidation );
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(dto));
+    public ResponseEntity<?> createUser(@RequestBody UserDTO dto) {
+        try {
+            ControllerValidation.validateCreateUserDto(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(dto));
+             
+        } catch (EntityAttributeExistsException | InvalidAttributeException error) {
+            // Manejar la excepción específica lanzada desde el servicio
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
+        }
     }
         
+    @DeleteMapping(value="/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(service.deleteUser(id));
+            
+        } catch(EntityNotFoundException error) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
+        }
+    }
+    
     @PutMapping(value="/{id}")
-    public ResponseEntity<UserDTO> updateAllUser(@PathVariable Long id, @RequestBody UserDTO dto){
-        return ResponseEntity.status(HttpStatus.OK).body(service.updateAllUser(id, dto));
+    public ResponseEntity<?> updateAllUser(@PathVariable Long id, @RequestBody UserDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(service.updateAllUser(id, dto));
+
+        } catch (EntityNotFoundException | EntityNullAttributesException | FatalErrorException error) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
+        }
     }
 
     @PatchMapping(value="/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserDTO dto){
-        return ResponseEntity.status(HttpStatus.OK).body(service.updateUser(id, dto));
-    }
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody UserDTO dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(service.updateUser(id, dto));
 
-    @DeleteMapping(value="/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id){
-        return ResponseEntity.status(HttpStatus.OK).body(service.deleteUser(id));
+        } catch(EntityNotFoundException error) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
+        }
     }
 }

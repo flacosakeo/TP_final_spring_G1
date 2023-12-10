@@ -1,5 +1,6 @@
 package com.proyectoFinal.homebanking.tools.validations;
 
+import com.proyectoFinal.homebanking.exceptions.InvalidAttributeException;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
 
@@ -28,25 +29,23 @@ public class ControllerValidation {
     // endregion
 
     // region ------------------  USER CONTROLLER VALIDATIONS  ------------------
-    public static String validateCreateUserDto(UserDTO dto) {
+    public static void validateCreateUserDto(UserDTO dto) {
 
         if(!ControllerValidation.emailIsValid(dto.getEmail()))
-            return NotificationMessage.invalidEmail(dto.getEmail());
+            throw new InvalidAttributeException( NotificationMessage.invalidEmail(dto.getEmail()) );
 
         if(!ControllerValidation.passwordIsValid(dto.getPassword()))
-            return NotificationMessage.invalidPassword();
+            throw new InvalidAttributeException( NotificationMessage.invalidPassword() );
 
         if(!ControllerValidation.nameIsValid(dto.getName()))
-            return NotificationMessage.invalidName();
+            throw new InvalidAttributeException( NotificationMessage.invalidName() );
 
         if(!ControllerValidation.usernameIsValid(dto.getUsername()))
-            return NotificationMessage.usernameInvalid();
+            throw new InvalidAttributeException( NotificationMessage.usernameInvalid() );
 
         // Verificar si el DNI es válido y asi con cada atributo
         if( !ControllerValidation.dniNumberDigitsIsValid(dto.getDni()) )
-            return NotificationMessage.dniNotFound(dto.getDni());
-
-        return "OK";
+            throw new InvalidAttributeException( NotificationMessage.dniNotFound(dto.getDni()) );
     }
 
 

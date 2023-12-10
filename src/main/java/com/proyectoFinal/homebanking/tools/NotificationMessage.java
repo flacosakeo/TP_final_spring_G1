@@ -100,7 +100,7 @@ public class NotificationMessage {
     }
 
     public static String userUsernameExists(String email) {
-        return "¡Ya existe un usuario con el USERNAME " + email.toUpperCase() + "!";
+        return "¡Ya existe un usuario con el USERNAME: '" + email.toUpperCase() + "'!";
     }
 
     public static String userDeleted() {
