@@ -1,5 +1,14 @@
 package com.proyectoFinal.homebanking.models.Enum;
 
 public enum AccountType {
-    CAJA_DE_AHORRO, CAJA_DE_AHORRO_EN_DOLARES, CUENTA_CORRIENTE;
+    SAVINGS_BANK("Caja de ahorro"),
+    DOLLAR_SAVINGS_BANK("Caja de ahorro en dolares"),
+    CURRENT_ACCOUNT("Cuenta corriente");
+
+    private final String name;
+
+
+    AccountType(String name) {
+        this.name = name;
+    }
 }
