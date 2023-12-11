@@ -26,7 +26,7 @@ public class UserController {
     @GetMapping
     public ResponseEntity<List<UserDTO>> getUsers() {
         List<UserDTO> usersDtoList = service.getUsers();
-        //llamar al servicio de usuarios para obtener la lista de usuarios
+        // Llamar al servicio de usuarios para obtener la lista de usuarios
         return ResponseEntity.status(HttpStatus.OK).body(usersDtoList);
     }
     
