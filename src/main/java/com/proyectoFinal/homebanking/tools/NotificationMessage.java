@@ -4,6 +4,16 @@ import java.math.BigDecimal;
 
 public class NotificationMessage {
 
+    // region ------------------  GENERALS ERROR MESSAGES  ------------------
+    public static String allAttributesAreNull() {
+        return "¡No se envio ningún atributo!";
+    }
+
+    public static String nullAttributes() {
+        return "¡Uno o varios de los atributos enviados son nulos!";
+    }
+    //endregion
+
     // region ------------------  TRANSFERS ERROR MESSAGES  ------------------
     // region  ------------  CONTROLLER  ------------
     public static String requiredAccount() {
@@ -73,7 +83,7 @@ public class NotificationMessage {
     }
 
     public static String invalidPassword() {
-        return "¡Contraseña incorrecta! Debe contener al menos 8 caracteres";
+        return "¡Contraseña inválida! Debe contener al menos 8 caracteres";
     }
 
     public static String invalidName() {
@@ -84,6 +94,8 @@ public class NotificationMessage {
     public static String usernameInvalid() {
         return "¡Username invalido! Debe tener entre 4 y 8 caracteres. Solo se admiten letras o números";
     }
+
+
     // endregion
 
     // region  ------------  SERVICE  ------------
@@ -110,10 +122,7 @@ public class NotificationMessage {
     public static String userNotFoundAndNullAttributes(Long id) {
         return "El usuario con id '" + id + "' NO fue encontrado! Y uno o varios atributos son nulos";
     }
-
-    public static String userNullAttributes() {
-        return "¡Uno o varios de los atributos enviados son nulos!";
-    }
     // endregion
+
     // endregion
 }

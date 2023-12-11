@@ -1,9 +1,6 @@
 package com.proyectoFinal.homebanking.services;
 
-import com.proyectoFinal.homebanking.exceptions.EntityNotFoundException;
-import com.proyectoFinal.homebanking.exceptions.EntityAttributeExistsException;
-import com.proyectoFinal.homebanking.exceptions.EntityNullAttributesException;
-import com.proyectoFinal.homebanking.exceptions.FatalErrorException;
+import com.proyectoFinal.homebanking.exceptions.*;
 import com.proyectoFinal.homebanking.mappers.UserMapper;
 import com.proyectoFinal.homebanking.models.DTO.AccountDTO;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
@@ -64,11 +61,10 @@ public class UserService {
     }
     
     public UserDTO updateAllUser(Long id, UserDTO dto) throws FatalErrorException, EntityNotFoundException,
-            EntityNullAttributesException {
+            EntityNullAttributesException, InvalidAttributeException {
 
         // Primero verifico si existe un usuario con ese id en la BD
-        // Y tambien se valida que todos los datos del "dto" no vienen en null
-        UserServiceValidation.validateUpdateAllUser(dto);
+        UserServiceValidation.validateUpdateAllUser(id, dto);
 
         // Si llega hasta aquí es porque ya se valido el dto. Entonces consigo el usuario a modificar desde la BD
         User userToModify = UserServiceValidation.findUserById(id);

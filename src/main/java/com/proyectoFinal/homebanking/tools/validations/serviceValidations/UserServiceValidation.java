@@ -19,6 +19,7 @@ public class UserServiceValidation {
     }
 
     public static void validateCreateUserDto(UserDTO dto) throws EntityAttributeExistsException {
+        // TODO: analizar logica de validacion del dto en el controlador. Porque nunca llega a mostrar estos mensajes.
         if(UserServiceValidation.existUserByEmail(dto.getEmail()) )
             throw new EntityAttributeExistsException( NotificationMessage.userEmailAttributeExists(dto.getEmail()) );
 
@@ -29,17 +30,25 @@ public class UserServiceValidation {
             throw new EntityAttributeExistsException( NotificationMessage.userDniExists(dto.getDni()) );
     }
 
-    public static void validateUpdateAllUser(UserDTO dto) throws FatalErrorException, EntityNotFoundException,
+    public static void validateUpdateAllUser(Long id, UserDTO dto) throws FatalErrorException, EntityNotFoundException,
             EntityNullAttributesException {
 
-        if(!UserServiceValidation.existUserById(dto.getId()) && !UserServiceValidation.validateUserDtoAttributes(dto))
-            throw new FatalErrorException( NotificationMessage.userNotFoundAndNullAttributes(dto.getId()) );
+        if(!existUserById(id) && !existsNullAttributes(dto))
+            throw new FatalErrorException( NotificationMessage.userNotFoundAndNullAttributes(id) );
 
-        if(!repository.existsById(dto.getId()))
-            throw new EntityNotFoundException( NotificationMessage.userNotFound(dto.getId()) );
+        if(!existUserById(id))
+            throw new EntityNotFoundException( NotificationMessage.userNotFound(id) );
 
-        if(!UserServiceValidation.validateUserDtoAttributes(dto))
-            throw new EntityNullAttributesException( NotificationMessage.userNullAttributes() );
+        if(!existsNullAttributes(dto))
+            throw new EntityNullAttributesException( NotificationMessage.nullAttributes() );
+    }
+
+    public static boolean existsNullAttributes(UserDTO dto) {
+        return dto.getEmail() != null &&
+                dto.getPassword() != null &&
+                dto.getName() != null &&
+                dto.getUsername() != null &&
+                dto.getDni() != null;
     }
 
     // Valida que existan usuarios unicos por mail
@@ -53,14 +62,6 @@ public class UserServiceValidation {
 
     public static Boolean existUserByUsername(String username) {
         return repository.existsByUsername(username);
-    }
-
-    public static boolean validateUserDtoAttributes(UserDTO dto) {
-        return dto.getEmail() != null &&
-                dto.getPassword() != null &&
-                dto.getName() != null &&
-                dto.getUsername() != null &&
-                dto.getDni() != null;
     }
 
     public static Boolean existUserById(Long id) {

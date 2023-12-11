@@ -1,5 +1,6 @@
 package com.proyectoFinal.homebanking.tools.validations;
 
+import com.proyectoFinal.homebanking.exceptions.EntityNullAttributesException;
 import com.proyectoFinal.homebanking.exceptions.InvalidAttributeException;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
@@ -29,8 +30,11 @@ public class ControllerValidation {
     // endregion
 
     // region ------------------  USER CONTROLLER VALIDATIONS  ------------------
-    public static void validateCreateUserDto(UserDTO dto) {
-    //TODO: Validar si los atributos son nulos
+    public static void validateUserDto(UserDTO dto) throws InvalidAttributeException, EntityNullAttributesException {
+
+        if(allAttributesAreNull(dto))
+            throw new EntityNullAttributesException(NotificationMessage.allAttributesAreNull());
+
         if(!ControllerValidation.emailIsValid(dto.getEmail()))
             throw new InvalidAttributeException( NotificationMessage.invalidEmail(dto.getEmail()) );
 
@@ -48,6 +52,13 @@ public class ControllerValidation {
             throw new InvalidAttributeException( NotificationMessage.dniNotFound(dto.getDni()) );
     }
 
+    public static boolean allAttributesAreNull(UserDTO dto) {
+        return dto.getEmail() == null &&
+                dto.getPassword() == null &&
+                dto.getName() == null &&
+                dto.getUsername() == null &&
+                dto.getDni() == null;
+    }
 
     // Valida que el dni tenga 8 digitos
     public static Boolean dniNumberDigitsIsValid(String dni) {

@@ -43,10 +43,10 @@ public class UserController {
     @PostMapping()
     public ResponseEntity<?> createUser(@RequestBody UserDTO dto) {
         try {
-            ControllerValidation.validateCreateUserDto(dto);
+            ControllerValidation.validateUserDto(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(dto));
              
-        } catch (EntityAttributeExistsException | InvalidAttributeException error) {
+        } catch (EntityAttributeExistsException | InvalidAttributeException | EntityNullAttributesException error) {
             // Manejar la excepción específica lanzada desde el servicio
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
         }
@@ -65,9 +65,12 @@ public class UserController {
     @PutMapping(value="/{id}")
     public ResponseEntity<?> updateAllUser(@PathVariable Long id, @RequestBody UserDTO dto) {
         try {
+            //Se valida que todos los datos del "dto" no vienen en null y que todos los atributos del UserDto
+            // sean correctos
+            ControllerValidation.validateUserDto(dto);
             return ResponseEntity.status(HttpStatus.OK).body(service.updateAllUser(id, dto));
 
-        } catch (EntityNotFoundException | EntityNullAttributesException | FatalErrorException error) {
+        } catch (EntityNotFoundException | EntityNullAttributesException | FatalErrorException | InvalidAttributeException error) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
         }
     }

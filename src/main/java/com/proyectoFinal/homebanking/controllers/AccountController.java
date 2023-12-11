@@ -7,8 +7,6 @@ import com.proyectoFinal.homebanking.services.AccountService;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -65,7 +63,7 @@ public class AccountController {
 
     @PatchMapping(value="/{id}/deposit")
     public ResponseEntity<?> depositMoney(@PathVariable Long id, @RequestBody Map<String, BigDecimal> requestBody){
-        BigDecimal amount = requestBody.get("monto");
+        BigDecimal amount = requestBody.get("amount");
         if(amount == null){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monto es requerido");
         }
