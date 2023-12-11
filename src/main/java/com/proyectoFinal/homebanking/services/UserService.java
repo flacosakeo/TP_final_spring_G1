@@ -20,11 +20,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
     private final UserRepository repository;
-    private final AccountService servicioCuenta;
+    private final AccountService serviceAccount;
 
-    public UserService(UserRepository repository, AccountService servicioCuenta) {
+    public UserService(UserRepository repository, AccountService serviceAccount) {
         this.repository = repository;
-        this.servicioCuenta = servicioCuenta;
+        this.serviceAccount = serviceAccount;
     }
 
     public List<UserDTO> getUsers() {
@@ -48,18 +48,18 @@ public class UserService {
         AccountDTO accountDto = new AccountDTO();
         accountDto.setAccountType(AccountType.SAVINGS_BANK);
         accountDto.setOwnerId(userSaved.getId());
-        servicioCuenta.createAccount(accountDto);
+        serviceAccount.createAccount(accountDto);
 
         return UserMapper.userToDto(userSaved);
     }
 
     public String deleteUser(Long id) throws EntityNotFoundException {
-        if (UserServiceValidation.existUserById(id)){
-            repository.deleteById(id);
-            return NotificationMessage.userDeleted();
-        }else{
+        if ( !UserServiceValidation.existUserById(id) ){
             throw new EntityNotFoundException( NotificationMessage.userNotFound(id) );
         }
+
+        repository.deleteById(id);
+        return NotificationMessage.userDeleted();
     }
     
     public UserDTO updateAllUser(Long id, UserDTO dto) throws FatalErrorException, EntityNotFoundException,
@@ -86,28 +86,29 @@ public class UserService {
     }
 
     public UserDTO updateUser(Long id, UserDTO dto) throws EntityNotFoundException {
-        if(UserServiceValidation.existUserById(id)){
-            User userToModify = UserServiceValidation.findUserById(id);
-
-            // LÓGICA DEL PATCH
-            if(dto.getName() != null)
-                userToModify.setName(dto.getName());
-
-            if(dto.getUsername() != null)
-                userToModify.setUsername(dto.getUsername());
-
-            if(dto.getDni() != null)
-                userToModify.setDni(dto.getDni());
-
-            if(dto.getEmail() != null)
-                userToModify.setEmail(dto.getEmail());
-
-            if(dto.getPassword() != null)
-                userToModify.setPassword(dto.getPassword());
-
-            User userModified = repository.save(userToModify);
-            return UserMapper.userToDto(userModified);
+        if( !UserServiceValidation.existUserById(id) ) {
+            throw new EntityNotFoundException( NotificationMessage.userNotFound(id) );
         }
-        throw new EntityNotFoundException( NotificationMessage.userNotFound(id) );
+
+        User userToModify = UserServiceValidation.findUserById(id);
+
+        // LÓGICA DEL PATCH
+        if(dto.getName() != null)
+            userToModify.setName(dto.getName());
+
+        if(dto.getUsername() != null)
+            userToModify.setUsername(dto.getUsername());
+
+        if(dto.getDni() != null)
+            userToModify.setDni(dto.getDni());
+
+        if(dto.getEmail() != null)
+            userToModify.setEmail(dto.getEmail());
+
+        if(dto.getPassword() != null)
+            userToModify.setPassword(dto.getPassword());
+
+        User userModified = repository.save(userToModify);
+        return UserMapper.userToDto(userModified);
     }
 }

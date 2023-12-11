@@ -13,11 +13,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
-import com.proyectoFinal.homebanking.tools.validations.serviceValidations.AccountValidation;
+import com.proyectoFinal.homebanking.tools.validations.serviceValidations.AccountServiceValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import static com.proyectoFinal.homebanking.tools.validations.serviceValidations.AccountValidation.generateValidAlias;
 
 @Service
 public class AccountService {
@@ -35,12 +33,12 @@ public class AccountService {
         /*for(int i=1; i<4; i++){
             List<AccountAlias> alias = AccountAlias.values()[new Random().nextInt(AccountAlias.values().length)];
         }*/
-        accountDTO.setAlias(AccountValidation.generateValidAlias());
+        accountDTO.setAlias(AccountServiceValidation.generateValidAlias());
         if(accountDTO.getAccountType() == null){
             accountDTO.setAccountType(AccountType.SAVINGS_BANK);
         }
         accountDTO.setAmount(BigDecimal.ZERO);
-        accountDTO.setCbu(AccountValidation.generateValidCbu());
+        accountDTO.setCbu(AccountServiceValidation.generateValidCbu());
 
         Account account = repository.save(AccountMapper.dtoToAccount(accountDTO));
         return AccountMapper.accountToDto(account);
@@ -53,13 +51,13 @@ public class AccountService {
         return AccountMapper.accountToDto(entity);
     }
     
-    public String deleteAccount(Long id){
-        if (repository.existsById(id)){
-            repository.deleteById(id);
-            return NotificationMessage.accountSuccessfullyDeleted(id);
-        }else{
+    public String deleteAccount(Long id) throws EntityNotFoundException {
+        if ( !AccountServiceValidation.existAccountById(id) ) {
             throw new EntityNotFoundException( NotificationMessage.accountNotFound(id) );
-        }       
+        }
+
+        repository.deleteById(id);
+        return NotificationMessage.accountSuccessfullyDeleted(id);
     }
     
     public Object updateAccount(Long id, AccountDTO dto){

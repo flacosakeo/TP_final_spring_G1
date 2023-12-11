@@ -1,8 +1,6 @@
 package com.proyectoFinal.homebanking.services;
 
-import com.proyectoFinal.homebanking.exceptions.AccountsAreTheSameException;
-import com.proyectoFinal.homebanking.exceptions.EntityNotFoundException;
-import com.proyectoFinal.homebanking.exceptions.InsufficientFoundsException;
+import com.proyectoFinal.homebanking.exceptions.*;
 import com.proyectoFinal.homebanking.mappers.TransferMapper;
 import com.proyectoFinal.homebanking.models.Account;
 import com.proyectoFinal.homebanking.models.DTO.TransferDTO;
@@ -16,6 +14,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
+import com.proyectoFinal.homebanking.tools.validations.serviceValidations.AccountServiceValidation;
 import com.proyectoFinal.homebanking.tools.validations.serviceValidations.TransferServiceValidation;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,55 +41,51 @@ public class TransferService {
         Transfer transfer = TransferServiceValidation.findTransferById(id);
         return TransferMapper.transferToDto(transfer);
     }
-    
-    public String deleteTransfer(Long id) {
-        if (transferRepository.existsById(id)) {
-            transferRepository.deleteById(id);
-            return NotificationMessage.transferSuccessfullyDeleted(id);
-        } else {
-            throw new EntityNotFoundException(NotificationMessage.transferNotFound(id));
-        }
-    }
 
     @Transactional
-    public TransferDTO createTransfer(TransferDTO dto) {
+    public TransferDTO createTransfer(TransferDTO dto) throws AccountsAreTheSameException, EntityNotFoundException,
+            InsufficientFoundsException {
 
         Long originAccountId = dto.getOriginAccountId();
         Long targetAccountId = dto.getTargetAccountId();
 
-        //verifica si ambas cuentas son iguales
+        // Verifica si ambas cuentas son iguales
         if(Objects.equals(originAccountId, targetAccountId)) {
-            throw new AccountsAreTheSameException(NotificationMessage.equalAccounts(originAccountId, targetAccountId));
+            throw new AccountsAreTheSameException( NotificationMessage.equalAccounts(originAccountId, targetAccountId) );
         }
 
         //verificar que las cuentas origen y destino existan
-        Account originAccount = accountRepository.findById( originAccountId )
-                             .orElseThrow( () -> new EntityNotFoundException( NotificationMessage.originAccountNotFound(
-                                     originAccountId )));
+        Account originAccount = AccountServiceValidation.findOriginAccountById(originAccountId);
+        Account destinationAccount = AccountServiceValidation.findTargetAccountById(targetAccountId);
 
-        Account destinationAccount = accountRepository.findById( targetAccountId )
-                             .orElseThrow(() -> new EntityNotFoundException(NotificationMessage.destinationAccountNotFound(
-                                     targetAccountId )));
-        
         // Verifica si la cuenta origen tiene fondos
         if (originAccount.getAmount().compareTo(dto.getAmount()) < 0) {
             throw new InsufficientFoundsException( NotificationMessage.insufficientFounds( originAccountId ));
         }
-        
+
         // Se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
         originAccount.setAmount( originAccount.getAmount().subtract(dto.getAmount()) );
         destinationAccount.setAmount( destinationAccount.getAmount().add( dto.getAmount()) );
-        
+
         // Guarda las cuentas actualizadas
         accountRepository.save(originAccount);
         accountRepository.save(destinationAccount);
-        
+
         // Crea la transferencia y la guarda en base de datos
         dto.setDateTime( LocalDateTime.now() );
         Transfer transfer = TransferMapper.dtoToTransfer(dto);
 
-        transfer = transferRepository.save(transfer);
-        return TransferMapper.transferToDto(transfer);
+        Transfer transferSaved = transferRepository.save(transfer);
+        return TransferMapper.transferToDto(transferSaved);
+    }
+
+    public String deleteTransfer(Long id) throws EntityNotFoundException {
+        if ( !TransferServiceValidation.existTransferById(id) ) {
+            throw new EntityNotFoundException( NotificationMessage.transferNotFound(id) );
+        }
+
+        transferRepository.deleteById(id);
+        return NotificationMessage.transferSuccessfullyDeleted(id);
     }
 
     // Creemos que una transferencia no deberia ser modificable, por el hecho de que queremos que quede registrado cada
@@ -98,31 +93,52 @@ public class TransferService {
     // Si hace falta realizar una modificacion, por ejemplo si se transfirio erroneamente, deberia realizarse otra
     // transferencia con el mismo monto y id de las cuentas de origen y destino de forma invertida.
     // TODO (#Ref. 2): agregar atributo en entidad TRANSFER que indique quien realiza o el estado de la transferencia.
-    public TransferDTO updateTransfer(Long id, TransferDTO dto) {
-        if(transferRepository.existsById(id)) {
-            Long originAccountId = dto.getOriginAccountId();
-            Long targetAccountId = dto.getTargetAccountId();
+    public TransferDTO updateAllTransfer(Long id, TransferDTO dto) throws FatalErrorException, EntityNotFoundException,
+            EntityNullAttributesException {
 
-            Transfer transferToModify = transferRepository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException( NotificationMessage.transferNotFound(id) ));
+        // Primero verifico si existe un usuario con ese id en la BD
+        // Y tambien se valida que todos los datos del "dto" no vienen en null
+        TransferServiceValidation.validateUpdateAllTransfer(dto);
 
-            // LÓGICA DEL PATCH
-            if(dto.getAmount() != null)
-                transferToModify.setAmount(dto.getAmount());
+        // Si llega hasta aquí es porque ya se valido el dto. Entonces consigo la transferencia a modificar desde la BD
+        Transfer transferToModify = TransferServiceValidation.findTransferById(id);
 
-            if(originAccountId != null)
-                transferToModify.setOriginAccountId(originAccountId);
+        // LÓGICA DEL PUT
+        transferToModify.setAmount(dto.getAmount());
+        transferToModify.setOriginAccountId(dto.getOriginAccountId());
+        transferToModify.setTargetAccountId(dto.getTargetAccountId());
 
-            if (targetAccountId != null)
-                transferToModify.setTargetAccountId(targetAccountId);
+        // Persistimos la modificacion del usuario en la BD
+        Transfer transferModified = transferRepository.save(transferToModify);
 
-            if (dto.getDateTime() != null)
-                transferToModify.setDateTime(dto.getDateTime());
+        return TransferMapper.transferToDto(transferModified);
+    }
 
-            Transfer transferModified = transferRepository.save(transferToModify);
-            return TransferMapper.transferToDto(transferModified);
+    public TransferDTO updateTransfer(Long id, TransferDTO dto) throws EntityNotFoundException {
+        if( !TransferServiceValidation.existTransferById(id) ) {
+            throw new EntityNotFoundException( NotificationMessage.transferNotFound(id) );
         }
-        throw new EntityNotFoundException(NotificationMessage.transferNotFound(id));
+
+        Long originAccountId = dto.getOriginAccountId();
+        Long targetAccountId = dto.getTargetAccountId();
+
+        Transfer transferToModify = TransferServiceValidation.findTransferById(id);
+
+        // LÓGICA DEL PATCH
+        if(dto.getAmount() != null)
+            transferToModify.setAmount(dto.getAmount());
+
+        if(originAccountId != null)
+            transferToModify.setOriginAccountId(originAccountId);
+
+        if (targetAccountId != null)
+            transferToModify.setTargetAccountId(targetAccountId);
+
+        if (dto.getDateTime() != null)
+            transferToModify.setDateTime(dto.getDateTime());
+
+        Transfer transferModified = transferRepository.save(transferToModify);
+        return TransferMapper.transferToDto(transferModified);
     }
 }
 

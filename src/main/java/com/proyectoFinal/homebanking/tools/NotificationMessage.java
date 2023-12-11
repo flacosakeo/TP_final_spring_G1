@@ -50,6 +50,10 @@ public class NotificationMessage {
     public static String transferSuccessfullyDeleted(Long id) {
         return "¡La transferencia con ID '" + id + "' ha sido eliminada!";
     }
+
+    public static String transferNotFoundAndNullAttributes(Long id) {
+        return "La transferencia con id '" + id + "' NO fue encontrada! Y uno o varios atributos son nulos";
+    }
     //endregion
     // endregion
 
@@ -70,7 +74,7 @@ public class NotificationMessage {
         return "Cuenta origen no existe, ID: '" + id + "'";
     }
 
-    public static String destinationAccountNotFound(Long id) {
+    public static String targetAccountNotFound(Long id) {
         return "Cuenta destino no existe, ID: '" + id + "'";
     }
 

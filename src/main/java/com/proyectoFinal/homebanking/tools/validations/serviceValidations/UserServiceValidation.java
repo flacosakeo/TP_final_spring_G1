@@ -42,6 +42,15 @@ public class UserServiceValidation {
             throw new EntityNullAttributesException( NotificationMessage.userNullAttributes() );
     }
 
+    public static User findUserById(Long id) throws EntityNotFoundException {
+        return repository.findById(id).orElseThrow( () ->
+                new EntityNotFoundException( NotificationMessage.userNotFound(id)) );
+    }
+
+    public static Boolean existUserById(Long id) {
+        return repository.existsById(id);
+    }
+
     // Valida que existan usuarios unicos por mail
     public static Boolean existUserByEmail(String email) {
         return repository.existsByEmail(email);
@@ -63,12 +72,5 @@ public class UserServiceValidation {
                 dto.getDni() != null;
     }
 
-    public static Boolean existUserById(Long id) {
-        return repository.existsById(id);
-    }
 
-    public static User findUserById(Long id) throws EntityNotFoundException {
-        return repository.findById(id).orElseThrow( () ->
-                new EntityNotFoundException( NotificationMessage.userNotFound(id)) );
-    }
 }
