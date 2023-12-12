@@ -23,14 +23,14 @@ public class TransferServiceValidation {
 
     }
 
-    public static void validateUpdateAllTransfer(TransferDTO dto) throws FatalErrorException, EntityNotFoundException,
+    public static void validateUpdateAllTransfer(Long id, TransferDTO dto) throws FatalErrorException, EntityNotFoundException,
             EntityNullAttributesException {
 
-        if(!existTransferById(dto.getId()) && !validateTransferDtoAttributes(dto))
-            throw new FatalErrorException( NotificationMessage.transferNotFoundAndNullAttributes(dto.getId()) );
+        if(!existTransferById(id) && !validateTransferDtoAttributes(dto))
+            throw new FatalErrorException( NotificationMessage.transferNotFoundAndNullAttributes(id) );
 
-        if(!existTransferById(dto.getId()))
-            throw new EntityNotFoundException( NotificationMessage.transferNotFound(dto.getId()) );
+        if(!existTransferById(id))
+            throw new EntityNotFoundException( NotificationMessage.transferNotFound(id) );
 
         if(!validateTransferDtoAttributes(dto)) // TODO: creo q el metodo userNullAttributes() cambio de nombre (+ general), actualizarlo con lo de flor
             throw new EntityNullAttributesException( NotificationMessage.allAttributesAreNull() );
@@ -41,7 +41,7 @@ public class TransferServiceValidation {
                 new EntityNotFoundException( NotificationMessage.transferNotFound(id)) );
     }
 
-    public static Boolean existTransferById(Long id) {
+    public static boolean existTransferById(Long id) {
         return repository.existsById(id);
     }
 

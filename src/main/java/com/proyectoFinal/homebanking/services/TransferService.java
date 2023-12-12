@@ -98,7 +98,7 @@ public class TransferService {
 
         // Primero verifico si existe un usuario con ese id en la BD
         // Y tambien se valida que todos los datos del "dto" no vienen en null
-        TransferServiceValidation.validateUpdateAllTransfer(dto);
+        TransferServiceValidation.validateUpdateAllTransfer(id, dto);
 
         // Si llega hasta aquí es porque ya se valido el dto. Entonces consigo la transferencia a modificar desde la BD
         Transfer transferToModify = TransferServiceValidation.findTransferById(id);
