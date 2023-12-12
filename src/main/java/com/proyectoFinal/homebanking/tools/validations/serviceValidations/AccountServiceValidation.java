@@ -19,7 +19,7 @@ public class AccountServiceValidation {
 
     public static void validateCreateAccountDTO(AccountDTO dto) throws EntityNotFoundException {
 
-        if(UserServiceValidation.existUserById(dto.getOwnerId()) )
+        if( !UserServiceValidation.existUserById(dto.getOwnerId()) )
             throw new EntityNotFoundException( NotificationMessage.userNotFound(dto.getOwnerId()) );
 
     }

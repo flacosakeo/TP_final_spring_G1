@@ -102,7 +102,7 @@ public class AccountService {
     }
 
     public AccountDTO extractMoney(Long id, BigDecimal amount) throws EntityNotFoundException, InsufficientFoundsException {
-        if(repository.existsById(id)) {
+        if( !AccountServiceValidation.existAccountById(id) ) {
             throw new EntityNotFoundException(NotificationMessage.accountNotFound(id));
         }
 

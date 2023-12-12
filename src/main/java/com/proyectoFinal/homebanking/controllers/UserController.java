@@ -46,7 +46,8 @@ public class UserController {
             ControllerValidation.validateUserDTO(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(dto));
              
-        } catch (EntityAttributeExistsException | InvalidAttributeException | EntityNullAttributesException error) {
+        } catch (EntityAttributeExistsException | InvalidAttributeException | EntityNullAttributesException |
+                EntityNotFoundException error) {
             // Manejar la excepción específica lanzada desde el servicio
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
         }
