@@ -7,6 +7,7 @@ import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +32,7 @@ public class ControllerValidation {
     // endregion
 
     // region ------------------  USER CONTROLLER VALIDATIONS  ------------------
-    public static void validateUserDto(UserDTO dto) throws InvalidAttributeException, EntityNullAttributesException {
+    public static void validateUserDTO(UserDTO dto) throws InvalidAttributeException, EntityNullAttributesException {
 
         if(allAttributesDTOAreNull(dto))
             throw new EntityNullAttributesException(NotificationMessage.allAttributesAreNull());
@@ -244,6 +245,47 @@ public class ControllerValidation {
             throw new AttributeNotRequiredException( NotificationMessage.attributeNotRequired("AMOUNT") );
     }
 
+    public static void validateAccountDtoToModify(AccountDTO dto) throws EntityNullAttributesException,
+            RequiredAttributeException, AttributeNotRequiredException {
+
+        if(allAttributesDTOAreNull(dto))
+            throw new EntityNullAttributesException( NotificationMessage.allAttributesAreNull() );
+
+        if(dto.getAlias() == null) {
+            throw new RequiredAttributeException( NotificationMessage.requiredAlias() );
+        }
+
+        validateNonRequiredAttributesDtoToModify(dto);
+    }
+
+    public static void validateNonRequiredAttributesDtoToModify(AccountDTO dto) throws AttributeNotRequiredException {
+        if(dto.getAccountType() != null)
+            throw new AttributeNotRequiredException( NotificationMessage.attributeNotRequired("accountType") );
+
+        if(dto.getOwnerId() != null)
+            throw new AttributeNotRequiredException( NotificationMessage.attributeNotRequired("ownerId") );
+
+        if(dto.getCbu() != null)
+            throw new AttributeNotRequiredException( NotificationMessage.attributeNotRequired("CBU") );
+
+        if(dto.getAmount() != null)
+            throw new AttributeNotRequiredException( NotificationMessage.attributeNotRequired("amount") );
+    }
+
+    public static BigDecimal validateAmountAttribute(Map<String, BigDecimal> requestBody) throws RequiredAttributeException,
+            InvalidAttributeException {
+
+        BigDecimal amount = requestBody.get("amount");
+
+        if(amount == null) {
+            throw new RequiredAttributeException( NotificationMessage.requiredAmount() );
+        }
+
+        if(!isPositive(amount))
+            throw new InvalidAttributeException( NotificationMessage.invalidAmount(amount) );
+
+        return amount;
+    }
     //public static boolean accountTypeIsValid(AccountType accountType) {
 //        if(accountType == null) return false;
 //

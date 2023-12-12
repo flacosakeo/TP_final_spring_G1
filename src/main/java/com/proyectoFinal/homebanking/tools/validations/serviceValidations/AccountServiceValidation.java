@@ -39,15 +39,15 @@ public class AccountServiceValidation {
                 new EntityNotFoundException( NotificationMessage.targetAccountNotFound(id)) );
     }
 
-    public static Boolean existAccountById(Long id) {
+    public static boolean existAccountById(Long id) {
         return repository.existsById(id);
     }
 
-    public static Boolean existByCbu(String cbu) {
+    public static boolean existByCbu(String cbu) {
         return repository.existsByCbu(cbu);
     }
 
-    public static Boolean existByAlias(String alias) {
+    public static boolean existByAlias(String alias) {
         return repository.existsByAlias(alias);
     }
 

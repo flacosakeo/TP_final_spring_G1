@@ -43,7 +43,7 @@ public class UserController {
     @PostMapping()
     public ResponseEntity<?> createUser(@RequestBody UserDTO dto) {
         try {
-            ControllerValidation.validateUserDto(dto);
+            ControllerValidation.validateUserDTO(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(dto));
              
         } catch (EntityAttributeExistsException | InvalidAttributeException | EntityNullAttributesException error) {
@@ -67,7 +67,7 @@ public class UserController {
         try {
             //Se valida que todos los datos del "dto" no vienen en null y que todos los atributos del UserDto
             // sean correctos
-            ControllerValidation.validateUserDto(dto);
+            ControllerValidation.validateUserDTO(dto);
             return ResponseEntity.status(HttpStatus.OK).body(service.updateAllUser(id, dto));
 
         } catch (EntityNotFoundException | EntityNullAttributesException | FatalErrorException | InvalidAttributeException error) {

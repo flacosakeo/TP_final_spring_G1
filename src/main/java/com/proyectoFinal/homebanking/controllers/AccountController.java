@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.proyectoFinal.homebanking.tools.validations.ControllerValidation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/accounts")
 public class AccountController {
-    @Autowired
     private final AccountService service;
     
     public AccountController(AccountService service) {
@@ -53,39 +51,53 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
         }
     }
-    
+
+    @DeleteMapping(value="/{id}")
+    public ResponseEntity<String> deleteAccount(@PathVariable Long id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(service.deleteAccount(id));
+
+        } catch(EntityNotFoundException error) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
+        }
+    }
+
     //@PutMapping(value="/{id}")
     //public void updateAllUser(@PathVariable Long id){}
     
     @PutMapping(value="/{id}")
-    public ResponseEntity<?> updateAccount(@PathVariable Long id, @RequestBody AccountDTO account){
-        if(account.getAlias() == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Alias es requerido");
+    public ResponseEntity<?> updateAccount(@PathVariable Long id, @RequestBody AccountDTO dto) {
+        try {
+            ControllerValidation.validateAccountDtoToModify(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(service.updateAccount(id, dto));
+
+        } catch(EntityNullAttributesException | RequiredAttributeException | AttributeNotRequiredException |
+                EntityNotFoundException error) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.updateAccount(id, account));
 
     }
-    
-    @DeleteMapping(value="/{id}")
-    public ResponseEntity<String> deleteAccount(@PathVariable Long id){
-        return ResponseEntity.status(HttpStatus.OK).body(service.deleteAccount(id));
+
+    @PatchMapping(value="/deposit/{id}")
+    public ResponseEntity<?> depositMoney(@PathVariable Long id, @RequestBody Map<String, BigDecimal> requestBody) {
+        try {
+            BigDecimal amount = ControllerValidation.validateAmountAttribute(requestBody);
+            return ResponseEntity.status(HttpStatus.OK).body(service.depositMoney(id, amount));
+
+        } catch(RequiredAttributeException | InvalidAttributeException | EntityNotFoundException error) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
+        }
     }
 
-    @PatchMapping(value="/{id}/deposit")
-    public ResponseEntity<?> depositMoney(@PathVariable Long id, @RequestBody Map<String, BigDecimal> requestBody){
-        BigDecimal amount = requestBody.get("amount");
-        if(amount == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monto es requerido");
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(service.depositMoney(id, amount));
-    }
+    @PatchMapping(value="/extract/{id}")
+    public ResponseEntity<?> extractMoney(@PathVariable Long id, @RequestBody Map<String, BigDecimal> requestBody) {
+        try {
+            BigDecimal amount = ControllerValidation.validateAmountAttribute(requestBody);
+            return ResponseEntity.status(HttpStatus.OK).body(service.extractMoney(id, amount));
 
-    @PatchMapping(value="/{id}/extract")
-    public ResponseEntity<?> extractMoney(@PathVariable Long id, @RequestBody Map<String, BigDecimal> requestBody){
-        BigDecimal amount = requestBody.get("monto");
-        if(amount == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Monto es requerido");
+        } catch(RequiredAttributeException | InvalidAttributeException | InsufficientFoundsException |
+                EntityNotFoundException error) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
         }
-        return ResponseEntity.status(HttpStatus.OK).body(service.extractMoney(id, amount));
     }
 }

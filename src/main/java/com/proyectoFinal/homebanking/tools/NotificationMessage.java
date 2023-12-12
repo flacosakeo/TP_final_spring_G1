@@ -19,7 +19,7 @@ public class NotificationMessage {
     }
 
     public static String attributeNotRequired(String attribute) {
-        return "¡" + attribute + " no es requerido!";
+        return "¡'" + attribute + "' no es requerido!";
     }
 
     // region ------------------  TRANSFERS ERROR MESSAGES  ------------------
@@ -158,11 +158,15 @@ public class NotificationMessage {
     }
 
     public static String userDeleted() {
-        return "¡El usuario fue eiminado existosamente!";
+        return "¡El usuario fue eliminado existosamente!";
     }
 
     public static String userNotFoundAndNullAttributes(Long id) {
-        return "El usuario con id '" + id + "' NO fue encontrado! Y uno o varios atributos son nulos";
+        return "El usuario con ID '" + id + "' NO fue encontrado! Y uno o varios atributos son nulos";
+    }
+
+    public static String requiredAlias() {
+        return "¡Alias es requerido!";
     }
     // endregion
 

@@ -13,14 +13,16 @@ import java.util.stream.Collectors;
 
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
 import com.proyectoFinal.homebanking.tools.validations.serviceValidations.AccountServiceValidation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AccountService {
-    @Autowired
-    private AccountRepository repository;
-    
+    private final AccountRepository repository;
+
+    public AccountService(AccountRepository repository) {
+        this.repository = repository;
+    }
+
     public List<AccountDTO> getAccount() {
         List<Account> accounts = repository.findAll();
         return accounts.stream()
@@ -43,8 +45,7 @@ public class AccountService {
     }
     
     public AccountDTO getAccountById(Long id) throws EntityNotFoundException {
-        Account entity = repository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
+        Account entity = AccountServiceValidation.findAccountById(id);
         return AccountMapper.accountToDto(entity);
     }
     
@@ -57,15 +58,17 @@ public class AccountService {
         return NotificationMessage.accountSuccessfullyDeleted(id);
     }
     
-    public Object updateAccount(Long id, AccountDTO dto){
-    //Account cbuValidate = repository.findByCbu(dto.getCbu());
-    //if(cbuValidate==null){
-        //Solo se va a poder modificar el ALIAS de account
-        if(repository.existsById(id)){
-            Account accountToModify = repository.findById(id).orElseThrow(() ->
-                    new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
+    public AccountDTO updateAccount(Long id, AccountDTO dto) throws EntityNotFoundException {
+        // Si llego hasta este punto, AccountService, es porque en el controlador ya se validaron
+        // los atributos requeridos para esta modificacion
+        if( !AccountServiceValidation.existAccountById(id) ) {
+            throw new EntityNotFoundException( NotificationMessage.accountNotFound(id) );
+        }
 
-            // LÓGICA DEL PATCH
+        // Solo se va a poder modificar el ALIAS de account
+        Account accountToModify = AccountServiceValidation.findAccountById(id);
+
+        // LÓGICA DEL PATCH
 //            if (dto.getAccountType()!=null)
 //                accountToModify.setTipo(dto.getTipo());
 
@@ -75,50 +78,46 @@ public class AccountService {
 //            if (dto.getCbu()!=null)
 //                accountToModify.setCbu(dto.getCbu());
 
-            if (dto.getAlias() != null)
-                accountToModify.setAlias(dto.getAlias());
+        accountToModify.setAlias(dto.getAlias());
 
-//            if (dto.getAmount()!=null)
+        //if (dto.getAmount()!=null)
 //                accountToModify.setAmount(dto.getAmount());
 
-            repository.save(accountToModify);
-            return AccountMapper.accountToDto(accountToModify);
-        }
-
-        return null;
+        Account accountSaved = repository.save(accountToModify);
+        return AccountMapper.accountToDto(accountSaved);
     }
 
-    public AccountDTO depositMoney(Long id, BigDecimal amount){
-        if(repository.existsById(id)){
-            Account accountToModify = repository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
-
-            accountToModify.setAmount(accountToModify.getAmount().add(amount));
-
-            Account accountModified = repository.save(accountToModify);
-            return AccountMapper.accountToDto(accountModified);
+    public AccountDTO depositMoney(Long id, BigDecimal amount) throws EntityNotFoundException {
+        if( !AccountServiceValidation.existAccountById(id) ) {
+            throw new EntityNotFoundException( NotificationMessage.accountNotFound(id) );
         }
-        throw new EntityNotFoundException(NotificationMessage.accountNotFound(id));
+
+        Account accountToModify = AccountServiceValidation.findAccountById(id);
+
+        // Se deposita el dinero en la cuenta
+        accountToModify.setAmount(accountToModify.getAmount().add(amount));
+
+        Account accountModified = repository.save(accountToModify);
+        return AccountMapper.accountToDto(accountModified);
     }
 
-    public AccountDTO extractMoney(Long id, BigDecimal amount) {
-        if(repository.existsById(id)){
-            Account accountToModify = repository.findById(id).orElseThrow( () ->
-                    new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
-
-            //verifica si la cuenta origen tiene fondos
-
-            if (accountToModify.getAmount().compareTo(amount) < 0){
-                throw new InsufficientFoundsException( NotificationMessage.insufficientFounds(accountToModify.getId()));
-            }
-
-            //se hace la transferencia, se resta de la cuenta origen y se suma en la cuenta destino
-            accountToModify.setAmount(accountToModify.getAmount().subtract(amount));
-
-            Account accountModified = repository.save(accountToModify);
-            return AccountMapper.accountToDto(accountModified);
+    public AccountDTO extractMoney(Long id, BigDecimal amount) throws EntityNotFoundException, InsufficientFoundsException {
+        if(repository.existsById(id)) {
+            throw new EntityNotFoundException(NotificationMessage.accountNotFound(id));
         }
-        throw new EntityNotFoundException(NotificationMessage.accountNotFound(id));
+
+        Account accountToModify = AccountServiceValidation.findAccountById(id);
+
+        // Verifica si la cuenta origen tiene fondos
+        if (accountToModify.getAmount().compareTo(amount) < 0){
+            throw new InsufficientFoundsException( NotificationMessage.insufficientFounds(accountToModify.getId()));
+        }
+
+        // Se hace la transferencia. Se resta de la cuenta origen y se suma en la cuenta destino
+        accountToModify.setAmount(accountToModify.getAmount().subtract(amount));
+
+        Account accountModified = repository.save(accountToModify);
+        return AccountMapper.accountToDto(accountModified);
     }
 
 }
