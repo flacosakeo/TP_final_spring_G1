@@ -6,7 +6,6 @@ import com.proyectoFinal.homebanking.exceptions.InsufficientFoundsException;
 import com.proyectoFinal.homebanking.mappers.AccountMapper;
 import com.proyectoFinal.homebanking.models.Account;
 import com.proyectoFinal.homebanking.models.DTO.AccountDTO;
-import com.proyectoFinal.homebanking.models.Enum.AccountType;
 import com.proyectoFinal.homebanking.repositories.AccountRepository;
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,30 +21,28 @@ public class AccountService {
     @Autowired
     private AccountRepository repository;
     
-    public List<AccountDTO> getAccount(){
+    public List<AccountDTO> getAccount() {
         List<Account> accounts = repository.findAll();
         return accounts.stream()
                 .map(AccountMapper::accountToDto)                
                 .collect(Collectors.toList());
     }
 
-    public Object createAccount(AccountDTO accountDTO){
+    public AccountDTO createAccount(AccountDTO dto) throws EntityNotFoundException {
         /*for(int i=1; i<4; i++){
             List<AccountAlias> alias = AccountAlias.values()[new Random().nextInt(AccountAlias.values().length)];
         }*/
-        accountDTO.setAlias(AccountServiceValidation.generateValidAlias());
-        if(accountDTO.getAccountType() == null){
-            accountDTO.setAccountType(AccountType.SAVINGS_BANK);
-        }
-        accountDTO.setAmount(BigDecimal.ZERO);
-        accountDTO.setCbu(AccountServiceValidation.generateValidCbu());
+        AccountServiceValidation.validateCreateAccountDTO(dto);
 
-        Account account = repository.save(AccountMapper.dtoToAccount(accountDTO));
+        dto.setCbu(AccountServiceValidation.generateValidCbu());
+        dto.setAlias(AccountServiceValidation.generateValidAlias());
+        dto.setAmount(BigDecimal.ZERO);
+
+        Account account = repository.save(AccountMapper.dtoToAccount(dto));
         return AccountMapper.accountToDto(account);
-
     }
     
-    public AccountDTO getAccountById(Long id){
+    public AccountDTO getAccountById(Long id) throws EntityNotFoundException {
         Account entity = repository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(NotificationMessage.accountNotFound(id)));
         return AccountMapper.accountToDto(entity);

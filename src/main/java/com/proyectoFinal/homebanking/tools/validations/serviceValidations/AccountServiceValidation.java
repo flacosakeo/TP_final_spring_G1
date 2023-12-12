@@ -2,6 +2,7 @@ package com.proyectoFinal.homebanking.tools.validations.serviceValidations;
 
 import com.proyectoFinal.homebanking.exceptions.EntityNotFoundException;
 import com.proyectoFinal.homebanking.models.Account;
+import com.proyectoFinal.homebanking.models.DTO.AccountDTO;
 import com.proyectoFinal.homebanking.repositories.AccountRepository;
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
 import com.proyectoFinal.homebanking.tools.Utility;
@@ -12,8 +13,15 @@ public class AccountServiceValidation {
 
     private static AccountRepository repository;
 
-    public AccountServiceValidation(AccountRepository accountRepository) {
-        AccountServiceValidation.repository = accountRepository;
+    public AccountServiceValidation(AccountRepository repository) {
+        AccountServiceValidation.repository = repository;
+    }
+
+    public static void validateCreateAccountDTO(AccountDTO dto) throws EntityNotFoundException {
+
+        if(UserServiceValidation.existUserById(dto.getOwnerId()) )
+            throw new EntityNotFoundException( NotificationMessage.userNotFound(dto.getOwnerId()) );
+
     }
 
     public static Account findAccountById(Long id) throws EntityNotFoundException {
@@ -58,9 +66,4 @@ public class AccountServiceValidation {
         }while(existByAlias(alias));
         return alias;
     }
-
-
-
-
-
 }

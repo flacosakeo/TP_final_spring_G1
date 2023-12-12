@@ -1,12 +1,15 @@
 
 package com.proyectoFinal.homebanking.controllers;
 
+import com.proyectoFinal.homebanking.exceptions.*;
 import com.proyectoFinal.homebanking.models.DTO.AccountDTO;
 import com.proyectoFinal.homebanking.services.AccountService;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+
+import com.proyectoFinal.homebanking.tools.validations.ControllerValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,24 +27,31 @@ public class AccountController {
     
     @GetMapping
     public ResponseEntity<List<AccountDTO>> getAccount(){
-        List<AccountDTO> lista=service.getAccount();
-        //llamar al servicio de usuarios para obtener la lista de usuarios
-        return ResponseEntity.status(HttpStatus.OK).body(lista);
+        List<AccountDTO> accountDtoList = service.getAccount();
+        return ResponseEntity.status(HttpStatus.OK).body(accountDtoList);
     }
     
     @GetMapping(value="/{id}")
-    public ResponseEntity<AccountDTO> getAccountById(@PathVariable Long id){//el pathvariable guarda el id de la request
-                                                   //en la variable id de la funcion
-        return ResponseEntity.status(HttpStatus.OK).body(service.getAccountById(id));
+    public ResponseEntity<?> getAccountById(@PathVariable Long id) {
+        try {
+            return ResponseEntity.status(HttpStatus.OK).body(service.getAccountById(id));
+
+        } catch(EntityNotFoundException error) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
+        }
     }
     
     @PostMapping()
-    public ResponseEntity<?> createAccount(@RequestBody AccountDTO account){
-        if(account.getOwnerId() == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("id user es requerido");
-        }
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createAccount(account));
+    public ResponseEntity<?> createAccount(@RequestBody AccountDTO dto) {
+        try {
+            ControllerValidation.validateAccountDTO(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(service.createAccount(dto));
 
+        } catch(EntityNullAttributesException | RequiredAttributeException | InvalidAttributeException |
+                AttributeNotRequiredException | EntityNotFoundException error) {
+
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.getMessage());
+        }
     }
     
     //@PutMapping(value="/{id}")

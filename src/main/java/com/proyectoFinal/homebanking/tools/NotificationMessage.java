@@ -18,6 +18,10 @@ public class NotificationMessage {
         return "Tipo de número no compatible. Se esperaba Double, Float, Integer o Long.";
     }
 
+    public static String attributeNotRequired(String attribute) {
+        return "¡" + attribute + " no es requerido!";
+    }
+
     // region ------------------  TRANSFERS ERROR MESSAGES  ------------------
     // region  ------------  CONTROLLER  ------------
     public static String requiredAccounts() {
@@ -69,6 +73,17 @@ public class NotificationMessage {
 
     // region ------------------  ACCOUNTS ERROR MESSAGES  ------------------
     // region  ------------  CONTROLLER  ------------
+    public static String ownerIdRequired() {
+        return "El ID del titular de la cuenta es requerido";
+    }
+
+    public static String accountTypeRequired() {
+        return "El 'accountType' es requerido";
+    }
+
+    public static String invalidOwnerId() {
+        return "¡Ingrese una 'ownerId' valido!";
+    }
     // endregion
 
     // region  ------------  SERVICE  ------------

@@ -1,9 +1,7 @@
 package com.proyectoFinal.homebanking.tools.validations;
 
-import com.proyectoFinal.homebanking.exceptions.EntityNullAttributesException;
-import com.proyectoFinal.homebanking.exceptions.FatalErrorException;
-import com.proyectoFinal.homebanking.exceptions.InvalidAttributeException;
-import com.proyectoFinal.homebanking.exceptions.RequiredAttributeException;
+import com.proyectoFinal.homebanking.exceptions.*;
+import com.proyectoFinal.homebanking.models.DTO.AccountDTO;
 import com.proyectoFinal.homebanking.models.DTO.TransferDTO;
 import com.proyectoFinal.homebanking.models.DTO.UserDTO;
 import com.proyectoFinal.homebanking.tools.NotificationMessage;
@@ -35,27 +33,27 @@ public class ControllerValidation {
     // region ------------------  USER CONTROLLER VALIDATIONS  ------------------
     public static void validateUserDto(UserDTO dto) throws InvalidAttributeException, EntityNullAttributesException {
 
-        if(allAttributesAreNull(dto))
+        if(allAttributesDTOAreNull(dto))
             throw new EntityNullAttributesException(NotificationMessage.allAttributesAreNull());
 
-        if(!ControllerValidation.emailIsValid(dto.getEmail()))
+        if(!emailIsValid(dto.getEmail()))
             throw new InvalidAttributeException( NotificationMessage.invalidEmail(dto.getEmail()) );
 
-        if(!ControllerValidation.passwordIsValid(dto.getPassword()))
+        if(!passwordIsValid(dto.getPassword()))
             throw new InvalidAttributeException( NotificationMessage.invalidPassword() );
 
-        if(!ControllerValidation.nameIsValid(dto.getName()))
+        if(!nameIsValid(dto.getName()))
             throw new InvalidAttributeException( NotificationMessage.invalidName() );
 
-        if(!ControllerValidation.usernameIsValid(dto.getUsername()))
+        if(!usernameIsValid(dto.getUsername()))
             throw new InvalidAttributeException( NotificationMessage.usernameInvalid() );
 
         // Verificar si el DNI es válido y asi con cada atributo
-        if( !ControllerValidation.dniNumberDigitsIsValid(dto.getDni()) )
+        if( !dniNumberDigitsIsValid(dto.getDni()) )
             throw new InvalidAttributeException( NotificationMessage.dniNotFound(dto.getDni()) );
     }
 
-    public static boolean allAttributesAreNull(UserDTO dto) {
+    public static boolean allAttributesDTOAreNull(UserDTO dto) {
         return dto.getEmail() == null &&
                 dto.getPassword() == null &&
                 dto.getName() == null &&
@@ -64,7 +62,7 @@ public class ControllerValidation {
     }
 
     // Valida que el dni tenga 8 digitos
-    public static Boolean dniNumberDigitsIsValid(String dni) {
+    public static boolean dniNumberDigitsIsValid(String dni) {
         // DNI a verificar viene por el parametro. Si no se pasa tal atributo, no se analiza mas nada.
         // Es decir que si se pasara un null se romperia en el matcher si se deja pasar tal atributo.
         if(dni == null) return false;
@@ -82,7 +80,7 @@ public class ControllerValidation {
         return matcher.matches();
     }
 
-    public static Boolean emailIsValid(String email){
+    public static boolean emailIsValid(String email){
         if(email == null) return false;
 
         Pattern pattern = Pattern.compile("[^@ ]+@[^@ .]+\\.[a-z]{2,}(\\.[a-z]{2})?");
@@ -91,7 +89,7 @@ public class ControllerValidation {
         return matcher.matches();
     }
 
-    public static Boolean passwordIsValid(String password){
+    public static boolean passwordIsValid(String password){
         if(password == null) return false;
 
         Pattern pattern = Pattern.compile(".{8,}");
@@ -101,7 +99,7 @@ public class ControllerValidation {
     }
 
     // El name debe comenzar en mayuscula y tener al menos 2 letras. Acepta nombres compuestos(hasta 3 palabras)
-    public static Boolean nameIsValid(String name) {
+    public static boolean nameIsValid(String name) {
         if(name == null) return false;
 
         Pattern pattern = Pattern.compile("([A-Z][a-z]+ ?){1,3}");
@@ -111,7 +109,7 @@ public class ControllerValidation {
     }
 
     // Valida que el username tenga al entre 4 y 8 caracteres. Solo admite letras o numeros.
-    public static Boolean usernameIsValid(String username) {
+    public static boolean usernameIsValid(String username) {
         if(username == null) return false;
 
         Pattern pattern = Pattern.compile("\\w{4,8}");
@@ -192,4 +190,63 @@ public class ControllerValidation {
     }
     // endregion
 
+    // region ------------------  ACCOUNT CONTROLLER VALIDATIONS  ------------------
+    public static void validateAccountDTO(AccountDTO dto) throws EntityNullAttributesException, RequiredAttributeException,
+            InvalidAttributeException, AttributeNotRequiredException {
+
+        if(allAttributesDTOAreNull(dto))
+            throw new EntityNullAttributesException( NotificationMessage.allAttributesAreNull() );
+
+        validateRequiredDTOAttributesExist(dto);
+
+        validateAttributes(dto);
+
+        validateNonRequiredAttributesDTO(dto);
+    }
+
+    public static void validateAttributes(AccountDTO dto) throws InvalidAttributeException {
+        if( !isPositive(dto.getOwnerId()) )
+            throw new InvalidAttributeException( NotificationMessage.invalidOwnerId() );
+
+        // NO SE VALIDA. Porque nunca llegaria hasta este punto con la estructura del metodo que se ejecuta con la solicituid http.
+        // Romperia dentro de SPRING al desearealizar el objeto. Entonces se deberia cambiar el parametro AccountDTO del controlador
+        // por un Map<String, String> y mapearlo manualmente y ahi si podremos validar este atributo.
+//        if(!accountTypeIsValid( dto.getAccountType()) )
+//            throw new InvalidAttributeException( "Tipo de cuenta invalido..." );
+
+        // Verificar si el ownerId existe se hace en el AccountServiceValidation: Validación del servicio de cuentas
+    }
+
+    public static void validateRequiredDTOAttributesExist(AccountDTO dto) throws RequiredAttributeException {
+        if(dto.getOwnerId() == null)
+            throw new RequiredAttributeException( NotificationMessage.ownerIdRequired() );
+
+        if(dto.getAccountType() == null)
+            throw new RequiredAttributeException( NotificationMessage.accountTypeRequired() );
+    }
+
+    public static boolean allAttributesDTOAreNull(AccountDTO dto) {
+        return dto.getAccountType() == null &&
+                dto.getOwnerId() == null &&
+                dto.getCbu() == null &&
+                dto.getAlias() == null &&
+                dto.getAmount() == null;
+    }
+
+    public static void validateNonRequiredAttributesDTO(AccountDTO dto) throws AttributeNotRequiredException {
+        if(dto.getCbu() != null)
+            throw new AttributeNotRequiredException( NotificationMessage.attributeNotRequired("CBU") );
+
+        if(dto.getAlias() != null)
+            throw new AttributeNotRequiredException( NotificationMessage.attributeNotRequired("ALIAS") );
+
+        if(dto.getAmount() != null)
+            throw new AttributeNotRequiredException( NotificationMessage.attributeNotRequired("AMOUNT") );
+    }
+
+    //public static boolean accountTypeIsValid(AccountType accountType) {
+//        if(accountType == null) return false;
+//
+//    }
+    // endregion
 }
